@@ -208,6 +208,14 @@ def fix_tables(dom):
             tags.add(parent)
     for tag in tags:
         distribute(tag)
+    # All other ins and del tags inside a table but not in a cell are invalid,
+    # so remove them.
+    for node in list(dom.getElementsByTagName('ins') +
+                     dom.getElementsByTagName('del')):
+        parent = node.parentNode
+        if parent.tagName in ['table', 'tbody', 'thead', 'tr']:
+            print parent
+            remove_node(node)
 
 def _strip_changes_new(node):
     for ins_node in node.getElementsByTagName('ins'):

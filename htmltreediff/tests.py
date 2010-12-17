@@ -681,6 +681,44 @@ insane_test_cases = [
         '<h1 id="ignore" class="ignore">one</h1>',
         [],
     ),
+    ( # whitespace changes in a table with colspan
+        '''
+        <table class="table_class">
+            <tbody>
+                <tr>
+                    <td colspan="2">top across</td>
+                </tr>
+                <tr>
+                    <td>bottom left</td>
+                    <td>bottom right</td>
+                </tr>
+            </tbody>
+        </table>
+        ''',
+        '''
+        <table class="table_class"><tbody>
+        <tr>
+        <td colspan="2">top across</td>
+        </tr>
+        <tr>
+        <td>bottom left</td>
+        <td>bottom right</td>
+        </tr>
+        </tbody></table>
+        ''',
+        collapse('''
+        <table class="table_class"><tbody>
+        <tr>
+        <td colspan="2">top across</td>
+        </tr>
+        <tr>
+        <td>bottom left</td>
+        <td>bottom right</td>
+        </tr>
+        </tbody></table>
+        '''),
+        [],
+    ),
 #BROKEN, see issue #2384
 #    # ul and ol tags are considered equal when diffing
 #    (
