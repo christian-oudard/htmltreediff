@@ -1,3 +1,5 @@
+from nose.tools import assert_equal
+
 from copy import copy
 from pprint import pformat
 from unittest import TestCase
@@ -23,9 +25,6 @@ from test_util import (
     collapse,
     fix_node_locations,
 )
-
-def test_parse():
-    parse_minidom('<!-- -->') # Shouldn't crash
 
 def test_cutoff():
     changes = html_changes(
@@ -734,6 +733,20 @@ class HtmlChangesTestCase(TestCase):
     def assert_strip_changes(self, old_html, new_html, changes):
         self.assert_html_equal(old_html, strip_changes_old(changes))
         self.assert_html_equal(new_html, strip_changes_new(changes))
+
+    def test_parse_comments(self):
+        self.assert_html_equal(
+            minidom_tostring(parse_minidom('<!-- -->')),
+            '',
+        )
+        self.assert_html_equal(
+            minidom_tostring(parse_minidom('<!--\n-->')),
+            '',
+        )
+        self.assert_html_equal(
+            minidom_tostring(parse_minidom('<p>stuff<!-- \n -->stuff</p>')),
+            '<p>stuffstuff</p>',
+        )
 
     def test_html_equal(self):
         html_equal_cases = [
