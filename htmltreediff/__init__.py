@@ -1,3 +1,13 @@
+"""Structure-aware diff for html and xml documents"""
+
+VERSION = (0, 1, 0)
+
+__version__ = ".".join(map(str, VERSION))
+__author__ = "Christian Oudard"
+__contact__ = "christian.oudard@gmail.com"
+__homepage__ = "http://github.com/christian-oudard/htmltreediff/"
+__docformat__ = "restructuredtext"
+
 from htmltreediff.text import text_changes
 from htmltreediff.html_diff import HtmlDiffer, tree_text_ratio
 from htmltreediff.edit_script_runner import EditScriptRunner
