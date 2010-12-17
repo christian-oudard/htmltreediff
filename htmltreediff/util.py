@@ -254,17 +254,3 @@ def unwrap(node):
     for child in list(node.childNodes):
         node.parentNode.insertBefore(child, node)
     remove_node(node)
-
-## iteration utilities ##
-
-# adapted from http://kmkeen.com/nonogram/index.html
-def interleave(*args):
-    """Consumes several iterators, returns iter-like flat(zip(*))."""
-    args = [iter(a) for a in args]
-    flags = [True] * len(args)
-    while any(flags):
-        for i, it in enumerate(args):
-            try:
-                yield it.next()
-            except StopIteration:
-                flags[i] = False
