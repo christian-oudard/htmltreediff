@@ -27,6 +27,14 @@ from test_util import (
 def test_parse():
     parse_minidom('<!-- -->') # Shouldn't crash
 
+def test_cutoff():
+    changes = html_changes(
+        '<h1>totally</h1>',
+        '<h2>different</h2>',
+    )
+    assert changes == ('<h2>The differences from the previous version are too '
+                       'large to show concisely.</h2>')
+
 
 class TextChangesTestCase(TestCase):
     def test_text_split(self):
