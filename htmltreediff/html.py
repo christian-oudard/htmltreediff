@@ -2,8 +2,8 @@ import re, cgi
 from collections import defaultdict
 from xml.dom import minidom
 
-from text import text_changes, wrap_html, PlaceholderMatcher
-from util import (
+from htmltreediff.text import text_changes, wrap_html, PlaceholderMatcher
+from htmltreediff.util import (
     is_text,
     is_element,
     ancestors,
@@ -85,7 +85,7 @@ def add_changes_markup(dom, ins_nodes, del_nodes):
                     if not m:
                         break
                     real_node = node_placeholders[m.group(1)]
-                    before, deleted, after = remove_text_section(text_node, m.start(), m.end())
+                    before_, deleted_, after = remove_text_section(text_node, m.start(), m.end())
                     insert_or_append(after.parentNode, real_node, after)
                     text_node = after
     # add markup for inserted and deleted sections
@@ -119,14 +119,14 @@ def remove_nesting(dom, tag_name):
                 unwrap(node)
                 break
 
-def sort_nodes(dom, cmp):
+def sort_nodes(dom, cmp_func):
     """
     Sort the nodes of the dom in-place, based on a comparison function.
     """
     dom.normalize()
     for node in list(walk_dom(dom, elements_only=True)):
         prev_sib = node.previousSibling
-        while prev_sib and cmp(prev_sib, node) == 1:
+        while prev_sib and cmp_func(prev_sib, node) == 1:
             node.parentNode.insertBefore(node, prev_sib)
             prev_sib = node.previousSibling
 
@@ -140,7 +140,7 @@ def sort_del_before_ins(dom):
         except AttributeError:
             pass
         return 0
-    sort_nodes(dom, cmp=node_cmp)
+    sort_nodes(dom, cmp_func=node_cmp)
 
 def merge_adjacent(dom, tag_name):
     """

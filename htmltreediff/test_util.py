@@ -1,18 +1,16 @@
 from copy import copy
 
-from html_diff import HtmlDiffer
-from edit_script_runner import EditScriptRunner
-from html import (
+from htmltreediff.html_diff import HtmlDiffer
+from htmltreediff.edit_script_runner import EditScriptRunner
+from htmltreediff.html import (
     sort_del_before_ins,
     _strip_changes_new,
     _strip_changes_old,
 )
-from util import (
+from htmltreediff.util import (
     parse_minidom,
     minidom_tostring,
     remove_dom_attributes,
-    remove_node,
-    unwrap,
 )
 
 def reverse_edit_script(edit_script):

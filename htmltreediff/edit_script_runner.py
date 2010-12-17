@@ -1,6 +1,6 @@
 from xml.dom import Node
 
-from util import (
+from htmltreediff.util import (
     get_child,
     get_location,
     remove_node,

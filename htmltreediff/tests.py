@@ -5,16 +5,16 @@ from pprint import pformat
 from unittest import TestCase
 from xml.dom import Node
 
-from __init__ import html_changes
-from text import text_changes, WordMatcher, PlaceholderMatcher
-from html import distribute, fix_lists, fix_tables
-from util import (
+from htmltreediff import html_changes
+from htmltreediff.text import text_changes, WordMatcher, PlaceholderMatcher
+from htmltreediff.html import distribute, fix_lists, fix_tables
+from htmltreediff.util import (
     parse_minidom,
     minidom_tostring,
     html_equal,
     get_location,
 )
-from test_util import (
+from htmltreediff.test_util import (
     reverse_edit_script,
     reverse_changes_html,
     html_diff,

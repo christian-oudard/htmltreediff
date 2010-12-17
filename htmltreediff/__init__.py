@@ -1,8 +1,8 @@
-from text import text_changes
-from html_diff import HtmlDiffer, tree_text_ratio
-from edit_script_runner import EditScriptRunner
-from html import add_changes_markup
-from util import (
+from htmltreediff.text import text_changes
+from htmltreediff.html_diff import HtmlDiffer, tree_text_ratio
+from htmltreediff.edit_script_runner import EditScriptRunner
+from htmltreediff.html import add_changes_markup
+from htmltreediff.util import (
     parse_minidom,
     minidom_tostring,
     get_location,

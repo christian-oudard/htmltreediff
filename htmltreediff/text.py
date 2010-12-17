@@ -1,8 +1,6 @@
 import re, string
 from difflib import SequenceMatcher, _calculate_ratio
 
-from flatten import flatten
-
 def multi_split(text, regexes):
     """
     Split the text by the given regexes, in priority order.
@@ -36,7 +34,7 @@ def multi_split(text, regexes):
     # pieces. Once a piece has been matched, add it to finished_pieces and
     # don't split it again. The pieces should always join back together to form
     # the original text.
-    def apply(regex, piece_list):
+    def apply_re(regex, piece_list):
         for piece in piece_list:
             if piece in finished_pieces:
                 yield piece
@@ -50,7 +48,7 @@ def multi_split(text, regexes):
     piece_list = [text]
     finished_pieces = set()
     for regex in regexes:
-        piece_list = list(apply(regex, piece_list))
+        piece_list = list(apply_re(regex, piece_list))
         if ''.join(piece_list) != text:
             raise ValueError('The regular expression %r did not preserve all pieces when splitting. It may not be parenthesized.' % regex.pattern)
     return piece_list
@@ -105,7 +103,11 @@ class WordMatcher(SequenceMatcher):
     split into a list of words. This uses a regular expression which groups
     word characters, numbers, punctuation, and html entities.
     """
-    def __init__(self, isjunk=_is_junk, a=[], b=[]):
+    def __init__(self, isjunk=_is_junk, a=None, b=None):
+        if a is None:
+            a = []
+        if b is None:
+            b = []
         SequenceMatcher.__init__(self, isjunk, a, b)
 
     def _split_text(self, text):

@@ -1,12 +1,11 @@
 import difflib
 from xml.dom import Node
 
-from text import WordMatcher
-from util import (
+from htmltreediff.text import WordMatcher
+from htmltreediff.util import (
     copy_dom,
     HashableNode,
     HashableTree,
-    remove_dom_attributes,
     is_text,
     get_child,
     get_location,
@@ -297,9 +296,9 @@ def similar_matches(a_seq, b_seq, eq_weight, cutoff=0.4):
     matches.append( (len(a_seq), len(b_seq), 0) ) # Add sentinel
     return matches
 
-def dict_max(d):
+def dict_max(dictionary):
     """Return the key corresponding to the maximum value in the dictionary."""
-    return max(d, key=lambda k: d.get(k))
+    return max(dictionary, key=lambda k: dictionary.get(k))
 
 # match-block maniplation #
 def nonmatching_blocks(matching_blocks):
