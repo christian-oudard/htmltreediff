@@ -21,10 +21,13 @@ def multi_split(text, regexes):
     Splitting on words first keeps the word with digits intact.
     >>> '|'.join(multi_split('one234five 678', [r'(\w+)', r'(\d+)']))
     'one234five| |678'
-    """
-    if not isinstance(regexes, (list, tuple)):
-        raise ValueError('regexes argument should be a list, not %s' % type(regexes).__name__)
 
+    Regexes need to be parenthesized so that all re.split keeps all pieces.
+    >>> '|'.join(multi_split('one two three', [r' ']))
+    Traceback (most recent call last):
+        ...
+    ValueError: The regular expression ' ' did not preserve all pieces when splitting. It may not be parenthesized.
+    """
     def make_regex(s):
         return re.compile(s) if isinstance(s, basestring) else s
     regexes = [make_regex(r) for r in regexes]
