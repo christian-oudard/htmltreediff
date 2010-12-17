@@ -15,7 +15,7 @@ import htmltreediff
 long_description = codecs.open("README.rst", "r", "utf-8").read()
 
 setup(
-    name="HTML Tree Diff",
+    name="html-tree-diff",
     version=htmltreediff.__version__,
     description=htmltreediff.__doc__,
     author=htmltreediff.__author__,
