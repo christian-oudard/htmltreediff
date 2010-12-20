@@ -10,23 +10,21 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages, Command
 
-import htmltreediff
-
 long_description = codecs.open("README.rst", "r", "utf-8").read()
 
 setup(
     name="html-tree-diff",
-    version=htmltreediff.__version__,
-    description=htmltreediff.__doc__,
-    author=htmltreediff.__author__,
-    author_email=htmltreediff.__contact__,
-    url=htmltreediff.__homepage__,
+    version="0.1.0",
+    description="Structure-aware diff for html and xml documents",
+    author="Christian Oudard",
+    author_email="christian.oudard@gmail.com",
+    url="http://github.com/christian-oudard/htmltreediff/",
     platforms=["any"],
     license="BSD",
     packages=find_packages(),
     scripts=[],
     zip_safe=False,
-    install_requires=[],
+    install_requires=['html5lib'],
     cmdclass={},
     classifiers=[
         "Development Status :: 3 - Alpha",
