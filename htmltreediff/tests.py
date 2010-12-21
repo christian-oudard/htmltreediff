@@ -3,6 +3,7 @@ from nose.tools import assert_equal
 from copy import copy
 from pprint import pformat
 from unittest import TestCase
+from textwrap import dedent
 from xml.dom import Node
 
 from htmltreediff import html_changes
@@ -13,6 +14,7 @@ from htmltreediff.util import (
     minidom_tostring,
     html_equal,
     get_location,
+    remove_insignificant_text_nodes,
 )
 from htmltreediff.test_util import (
     reverse_edit_script,
@@ -31,8 +33,84 @@ def test_cutoff():
         '<h1>totally</h1>',
         '<h2>different</h2>',
     )
-    assert changes == ('<h2>The differences from the previous version are too '
-                       'large to show concisely.</h2>')
+    assert_equal(
+        changes,
+        '<h2>The differences from the previous version are too large to show '
+        'concisely.</h2>',
+    )
+
+def test_illegal_text_nodes():
+    html = '''
+        <table>
+            illegal text
+            <tr>
+                <td>stuff</td>
+            </tr>
+        </table>
+    '''
+    dom = parse_minidom(html)
+    html = minidom_tostring(dom)
+    assert_equal(
+        html,
+        '<html><head/><body> illegal text '
+        '<table><tbody><tr><td>stuff</td></tr></tbody></table></body></html>',
+    )
+
+def test_remove_insignificant_text_nodes():
+    html = dedent('''
+        <html>
+            <head />
+            <body>
+                <p>
+                    one <em>two</em> <strong>three</strong>
+                </p>
+                <table>
+                    <tr>
+                        <td>stuff</td>
+                    </tr>
+                </table>
+            </body>
+        </html>
+    ''')
+    dom = parse_minidom(html)
+    remove_insignificant_text_nodes(dom)
+    html = minidom_tostring(dom)
+    assert_equal(
+        html,
+        '<html><head/><body> <p> one <em>two</em> <strong>three</strong> </p> '
+        '<table><tbody><tr><td>stuff</td></tr></tbody></table> </body></html>',
+    )
+
+    # Check that it is idempotent.
+    dom = parse_minidom(html)
+    remove_insignificant_text_nodes(dom)
+    html = minidom_tostring(dom)
+    assert_equal(
+        html,
+        ('<html><head/><body> <p> one <em>two</em> <strong>three</strong> </p> '
+         '<table><tbody><tr><td>stuff</td></tr></tbody></table> </body></html>'),
+    )
+
+def test_remove_insignificant_text_nodes_nbsp():
+    html = dedent('''
+        <table>
+        <tbody>
+        <tr>
+            <td> </td>
+            <td>&#160;</td>
+            <td>&nbsp;</td>
+        </tr>
+        </tbody>
+        </table>
+    ''')
+    dom = parse_minidom(html)
+    remove_insignificant_text_nodes(dom)
+    html = minidom_tostring(dom)
+    assert_equal(
+        html,
+        ('<html><head/><body><table><tbody><tr><td> </td><td> </td><td> </td>'
+         '</tr></tbody></table></body></html>'),
+    )
 
 
 class TextChangesTestCase(TestCase):
@@ -660,7 +738,8 @@ insane_test_cases = [
     ( # delete top row and add a column, funny whitespace
         '<table> <tr><td>A1</td></tr> <tr><td>B1</td></tr> </table>',
         '<table> <tr><td>B1</td><td>B2</td></tr> </table>',
-        '<table> <tr><td><del>A1</del></td></tr> <tr><td>B1</td><td><ins>B2</ins></td></tr> </table>',
+        ('<table><tbody><tr><td><del>A1</del></td></tr><tr><td>B1</td>'
+         '<td><ins>B2</ins></td></tr></tbody></table>'),
         [],
     ),
     ( # handle newline-separated words correctly
@@ -716,6 +795,42 @@ insane_test_cases = [
         <td>bottom right</td>
         </tr>
         </tbody></table>
+        '''),
+        [],
+    ),
+    ( # whitespace changes in a table with nbsp entity
+        '''
+        <table>
+        <tbody>
+        <tr>
+            <td> </td>
+            <td>&#160;</td>
+            <td>&nbsp;</td>
+        </tr>
+        </tbody>
+        </table>
+        ''',
+        '''
+        <table>
+        <tbody>
+        <tr>
+        <td> </td>
+        <td>&#160;</td>
+        <td>&nbsp;</td>
+        </tr>
+        </tbody>
+        </table>
+        ''',
+        collapse('''
+        <table>
+        <tbody>
+        <tr>
+        <td> </td>
+        <td>&#160;</td>
+        <td>&nbsp;</td>
+        </tr>
+        </tbody>
+        </table>
         '''),
         [],
     ),

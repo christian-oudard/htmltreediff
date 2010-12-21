@@ -14,6 +14,8 @@ def parse_minidom(xml, clean=True, html=True):
     # Parse
     if html:
         dom = html_parser.parse(xml)
+        if clean:
+            remove_insignificant_text_nodes(dom)
     else:
         dom = minidom.parseString(xml)
 
@@ -125,6 +127,27 @@ def remove_dom_attributes(dom):
     for node in walk_dom(dom):
         for key in attribute_dict(node).keys():
             node.attributes.removeNamedItem(key)
+
+_non_text_node_tags = [
+    'html', 'head', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'colgroup',
+    'col', 'ul', 'ol', 'dl', 'select', 'img', 'br', 'hr',
+]
+def remove_insignificant_text_nodes(dom):
+    """
+    For html elements that should not have text nodes inside them, remove all
+    whitespace. For elements that may have text, collapse multiple spaces to a
+    single space.
+    """
+    nodes_to_remove = []
+    for node in walk_dom(dom):
+        if is_text(node):
+            text = node.nodeValue
+            if node.parentNode.tagName in _non_text_node_tags:
+                nodes_to_remove.append(node)
+            else:
+                node.nodeValue = re.sub(r'\s+', ' ', text)
+    for node in nodes_to_remove:
+        remove_node(node)
 
 # information #
 def is_text(node):
