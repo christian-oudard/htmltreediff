@@ -213,7 +213,7 @@ def fix_tables(dom):
     for node in list(dom.getElementsByTagName('ins') +
                      dom.getElementsByTagName('del')):
         parent = node.parentNode
-        if parent.tagName in ['table', 'tbody', 'thead', 'tr']:
+        if parent.tagName in ['table', 'tbody', 'thead', 'tfoot', 'tr']:
             remove_node(node)
 
 def _strip_changes_new(node):

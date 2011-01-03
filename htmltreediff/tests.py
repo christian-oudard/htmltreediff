@@ -1207,6 +1207,37 @@ class HtmlChangesTestCase(TestCase):
                 </table>
                 '''
             ),
+            ( # remove ins and del tags at the wrong level of the table
+                '''
+                <table>
+                    <ins> </ins><del> </del>
+                    <thead>
+                        <ins> </ins><del> </del>
+                    </thead>
+                    <tfoot>
+                        <ins> </ins><del> </del>
+                    </tfoot>
+                    <tbody>
+                        <ins> </ins><del> </del>
+                        <tr>
+                            <ins> </ins><del> </del>
+                            <td><ins>A</ins></td>
+                        </tr>
+                    </tbody>
+                </table>
+                ''',
+                '''
+                <table>
+                    <thead></thead>
+                    <tfoot></tfoot>
+                    <tbody>
+                        <tr>
+                            <td><ins>A</ins></td>
+                        </tr>
+                    </tbody>
+                </table>
+                ''',
+            ),
         ]
         for changes, fixed_changes in cases:
             changes = collapse(changes)
