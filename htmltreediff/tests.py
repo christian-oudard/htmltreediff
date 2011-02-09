@@ -1,14 +1,18 @@
-from nose.tools import assert_equal
-
+import sys
+import tempfile
 from copy import copy
 from pprint import pformat
-from unittest import TestCase
 from textwrap import dedent
+from StringIO import StringIO
 from xml.dom import Node
+
+from nose.tools import assert_equal, assert_raises
+from unittest import TestCase
 
 from htmltreediff import html_changes
 from htmltreediff.text import text_changes, WordMatcher, PlaceholderMatcher
 from htmltreediff.html import distribute, fix_lists, fix_tables
+from htmltreediff.cli import main
 from htmltreediff.util import (
     parse_minidom,
     minidom_tostring,
@@ -111,6 +115,64 @@ def test_remove_insignificant_text_nodes_nbsp():
         ('<html><head/><body><table><tbody><tr><td> </td><td> </td><td> </td>'
          '</tr></tbody></table></body></html>'),
     )
+
+def test_html_changes_pretty():
+    cases = [
+        (
+            'Simple Addition',
+            '<h1>one</h1>',
+            '<h1>one</h1><h2>two</h2>',
+            dedent('''
+                <h1>
+                  one
+                </h1>
+                <ins>
+                  <h2>
+                    two
+                  </h2>
+                </ins>
+            ''').strip(),
+        ),
+    ]
+    for test_name, old_html, new_html, pretty_changes in cases:
+        def test():
+            changes = html_changes(old_html, new_html, cutoff=0.0, pretty=True)
+            print changes
+            assert_equal(pretty_changes, changes)
+        test.description = 'test_html_changes_pretty - %s' % test_name
+        yield test
+
+def test_main():
+    # Run the command line interface main function.
+    f1 = tempfile.NamedTemporaryFile()
+    f1.write('<h1>one</h1>')
+    f1.seek(0)
+    f2 = tempfile.NamedTemporaryFile()
+    f2.write('<h1>one</h1><h2>two</h2>')
+    f2.seek(0)
+
+    try:
+        old_stdout = sys.stdout
+        sys.stdout = stream = StringIO()
+        main(argv=('', f1.name, f2.name))
+        assert_equal(
+            stream.getvalue(),
+            dedent('''
+                <h1>
+                  one
+                </h1>
+                <ins>
+                  <h2>
+                    two
+                  </h2>
+                </ins>
+            ''').strip() + '\n',
+        )
+    finally:
+        sys.stdout = old_stdout
+
+    # Run it with no arguments, it throws an error.
+    assert_raises(IOError, main)
 
 
 class TextChangesTestCase(TestCase):

@@ -1,4 +1,6 @@
-import re, html5lib
+import re
+from textwrap import dedent
+import html5lib
 from html5lib import treebuilders
 from xml.dom import minidom, Node
 
@@ -63,8 +65,16 @@ def remove_newlines(xml):
     xml = xml.replace('\n', ' ')
     return xml.strip()
 
-def minidom_tostring(dom):
-    return remove_xml_declaration(dom.toxml())
+def minidom_tostring(dom, pretty=False):
+    if pretty:
+        xml = dom.toprettyxml()
+    else:
+        xml = dom.toxml()
+    xml = remove_xml_declaration(xml)
+    if xml.startswith('<body>') and xml.endswith('</body>'):
+        xml = xml[len('<body>'):-len('</body>')]
+    xml = dedent(xml.replace('\t', '  ')).strip()
+    return xml
 
 def html_equal(a_html, b_html):
     if a_html == b_html:

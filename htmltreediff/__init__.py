@@ -11,7 +11,7 @@ from htmltreediff.util import (
 
 __all__ = ['text_changes', 'html_changes', 'html_equal']
 
-def html_changes(old_html, new_html, cutoff=0.2):
+def html_changes(old_html, new_html, cutoff=0.2, pretty=False):
     """Show the differences between the old and new html document, as html.
 
     Return the document html with extra tags added to show changes. Add <ins>
@@ -34,7 +34,4 @@ def html_changes(old_html, new_html, cutoff=0.2):
     add_changes_markup(dom, runner.ins_nodes, runner.del_nodes)
     # Only return html for the document body contents.
     body = dom.getElementsByTagName('body')[0]
-    html = minidom_tostring(body)
-    if html.startswith('<body>') and html.endswith('</body>'):
-        return html[len('<body>'):-len('</body>')]
-    return ''
+    return minidom_tostring(body, pretty=pretty)
