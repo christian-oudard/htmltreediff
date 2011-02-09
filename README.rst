@@ -63,3 +63,9 @@ And also for text-only changes::
     ...     'The very quick brown foxes jump over the dog.',
     ... )
     The<ins> very</ins> quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.
+
+
+Running the unit tests
+----------------------
+
+The unit test suite requires the packages ``nose`` and ``coverage`` to run. Just run the ``run_tests.sh`` script, and all the tests will run, with code coverage. Code coverage should always be at 100%.
