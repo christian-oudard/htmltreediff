@@ -14,7 +14,7 @@ long_description = codecs.open("README.rst", "r", "utf-8").read()
 
 setup(
     name="html-tree-diff",
-    version="0.1.0",
+    version="0.1.1",
     description="Structure-aware diff for html and xml documents",
     author="Christian Oudard",
     author_email="christian.oudard@gmail.com",
