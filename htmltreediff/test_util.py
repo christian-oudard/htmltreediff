@@ -1,8 +1,8 @@
 from copy import copy
 
-from htmltreediff.html_diff import HtmlDiffer
+from htmltreediff.diff import Differ
 from htmltreediff.edit_script_runner import EditScriptRunner
-from htmltreediff.html import (
+from htmltreediff.changes import (
     sort_del_before_ins,
     _strip_changes_new,
     _strip_changes_old,
@@ -38,7 +38,7 @@ def reverse_changes(dom):
     sort_del_before_ins(dom)
 
 def html_diff(old_html, new_html):
-    differ = HtmlDiffer(parse_minidom(old_html), parse_minidom(new_html))
+    differ = Differ(parse_minidom(old_html), parse_minidom(new_html))
     return differ.get_edit_script()
 
 def html_patch(old_html, edit_script):

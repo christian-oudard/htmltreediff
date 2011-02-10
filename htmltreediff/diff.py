@@ -16,7 +16,7 @@ from htmltreediff.util import (
     tree_text,
 )
 
-class HtmlDiffer():
+class Differ():
     def __init__(self, old_dom, new_dom):
         self.edit_script = []
         self.old_dom = copy_dom(old_dom)
@@ -24,7 +24,7 @@ class HtmlDiffer():
 
     def get_edit_script(self):
         """
-        Take two html documents, and output an edit script transforming one into the other.
+        Take two doms, and output an edit script transforming one into the other.
 
         edit script output format
         Actions:

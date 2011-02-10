@@ -4,7 +4,8 @@ from nose.tools import assert_equal
 
 from htmltreediff import html_changes
 from htmltreediff.tests import assert_html_equal
-from htmltreediff.html import distribute, fix_lists, fix_tables
+from htmltreediff.changes import distribute
+from htmltreediff.html import fix_lists, fix_tables
 from htmltreediff.util import (
     parse_minidom,
     minidom_tostring,

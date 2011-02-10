@@ -15,7 +15,6 @@ from htmltreediff.util import (
     parse_minidom,
     minidom_tostring,
     html_equal,
-    get_location,
 )
 from htmltreediff.test_util import (
     reverse_edit_script,
