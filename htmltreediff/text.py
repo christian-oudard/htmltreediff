@@ -1,6 +1,28 @@
 import re, string
 from difflib import SequenceMatcher, _calculate_ratio
 
+def full_split(text, regex):
+    """
+    Split the text by the regex, keeping all parts.
+    The parts should re-join back into the original text.
+
+    >>> list(full_split('word', re.compile('&.*?')))
+    ['word']
+    """
+    while text:
+        m = regex.search(text)
+        if not m:
+            yield text
+            break
+        left = text[:m.start()]
+        middle = text[m.start():m.end()]
+        right = text[m.end():]
+        if left:
+            yield left
+        if middle:
+            yield middle
+        text = right
+
 def multi_split(text, regexes):
     """
     Split the text by the given regexes, in priority order.
@@ -9,22 +31,16 @@ def multi_split(text, regexes):
     re.split().
 
     Splitting on a single regex works like normal split.
-    >>> '|'.join(multi_split('one two three', [r'(\w+)']))
+    >>> '|'.join(multi_split('one two three', [r'\w+']))
     'one| |two| |three'
 
     Splitting on digits first separates the digits from their word
-    >>> '|'.join(multi_split('one234five 678', [r'(\d+)', r'(\w+)']))
+    >>> '|'.join(multi_split('one234five 678', [r'\d+', r'\w+']))
     'one|234|five| |678'
 
     Splitting on words first keeps the word with digits intact.
-    >>> '|'.join(multi_split('one234five 678', [r'(\w+)', r'(\d+)']))
+    >>> '|'.join(multi_split('one234five 678', [r'\w+', r'\d+']))
     'one234five| |678'
-
-    Regexes need to be parenthesized so that all re.split keeps all pieces.
-    >>> '|'.join(multi_split('one two three', [r' ']))
-    Traceback (most recent call last):
-        ...
-    ValueError: The regular expression ' ' did not preserve all pieces when splitting. It may not be parenthesized.
     """
     def make_regex(s):
         return re.compile(s) if isinstance(s, basestring) else s
@@ -34,23 +50,22 @@ def multi_split(text, regexes):
     # pieces. Once a piece has been matched, add it to finished_pieces and
     # don't split it again. The pieces should always join back together to form
     # the original text.
+    piece_list = [text]
+    finished_pieces = set()
     def apply_re(regex, piece_list):
         for piece in piece_list:
             if piece in finished_pieces:
                 yield piece
                 continue
-            for s in regex.split(piece):
+            for s in full_split(piece, regex):
                 if regex.match(s):
                     finished_pieces.add(s)
                 if s:
                     yield s
 
-    piece_list = [text]
-    finished_pieces = set()
     for regex in regexes:
         piece_list = list(apply_re(regex, piece_list))
-        if ''.join(piece_list) != text:
-            raise ValueError('The regular expression %r did not preserve all pieces when splitting. It may not be parenthesized.' % regex.pattern)
+        assert ''.join(piece_list) == text
     return piece_list
 
 
@@ -68,19 +83,19 @@ _word_list = [
 
 _word_split_regexes = [
     # HTML Entities
-    re.compile(r'(&.*?;)', re.IGNORECASE),
+    re.compile(r'&.*?;', re.IGNORECASE),
     # Special cases.
-    re.compile('(%s)' % '|'.join(re.escape(c) for c in _word_list), re.IGNORECASE),
+    re.compile('%s' % '|'.join(re.escape(c) for c in _word_list), re.IGNORECASE),
     # Simplified phone number pattern. Any dash-separated list of digits.
-    re.compile(r'(\d[\d-]+\d)'),
+    re.compile(r'\d+(-\d+)+'),
+    # Simplified date pattern. Any slash-separated list of digits.
+    re.compile(r'\d+(/\d+)+'),
     # Regular expression to split on words and punctuation.
     re.compile(
         r"""
-        (
-            [a-zA-Z]+ # a word
-            |\d+       # a number
-            |[%s]      # punctuation
-        )
+        [a-zA-Z]+ # a word
+        |\d+       # a number
+        |[%s]      # punctuation
         """ % (re.escape(string.punctuation)),
         re.VERBOSE
     ),
@@ -110,7 +125,8 @@ class WordMatcher(SequenceMatcher):
             b = []
         SequenceMatcher.__init__(self, isjunk, a, b)
 
-    def _split_text(self, text):
+    @staticmethod
+    def _split_text(text):
         return multi_split(text, _word_split_regexes)
 
     def set_seq1(self, a):
@@ -174,7 +190,8 @@ class WordMatcher(SequenceMatcher):
 
 _placeholder_regex = re.compile(r'({{{[^{].*?}}})')
 class PlaceholderMatcher(WordMatcher):
-    def _split_text(self, text):
+    @staticmethod
+    def _split_text(text):
         return multi_split(text, [_placeholder_regex] + _word_split_regexes)
 
     def _word_length(self, word):

@@ -36,6 +36,7 @@ def test_cutoff():
     changes = html_changes(
         '<h1>totally</h1>',
         '<h2>different</h2>',
+        cutoff=0.2,
     )
     assert_equal(
         changes,
@@ -174,45 +175,58 @@ def test_main():
     # Run it with no arguments, it throws an error.
     assert_raises(IOError, main)
 
+def test_text_split():
+    cases = [
+        ('word',
+         ['word']),
+        ('two words',
+         ['two', ' ', 'words']),
+        ('entity&quot;s',
+         ['entity', '&quot;', 's']),
+        ("we're excited",
+         ["we're", " ", "excited"]),
+        ('dial 1-800-555-1234',
+         ['dial', ' ', '1-800-555-1234']),
+        ('Effective 1/2/2003',
+         ['Effective', ' ', '1/2/2003']),
+    ]
+    placeholder_cases = [
+        ('{{{<DOM Element: tagname at 0xhexaddress >}}}',
+         ['{{{<DOM Element: tagname at 0xhexaddress >}}}']),
+        ('&nbsp;{{{<DOM Element: tagname at 0xhexaddress >}}}',
+         ['&nbsp;', '{{{<DOM Element: tagname at 0xhexaddress >}}}']),
+        ('\xa0{{{<DOM Element: tagname at 0xhexaddress >}}}',
+         ['\xa0', u'{{{<DOM Element: tagname at 0xhexaddress >}}}']),
+        ('{{{{<DOM Element: tagname at 0xhexaddress >}}}',
+         ['{', '{{{<DOM Element: tagname at 0xhexaddress >}}}']),
+    ]
+    for text, target in cases:
+        def test():
+            assert_equal(WordMatcher()._split_text(text), target)
+        yield test
+    for text, target in cases + placeholder_cases:
+        def test():
+            assert_equal(PlaceholderMatcher()._split_text(text), target)
+        test.description = 'test_text_split with placeholder - %s' % text
+        yield test
 
 class TextChangesTestCase(TestCase):
-    def test_text_split(self):
-        cases = [
-            ('word',
-             ['word']),
-            ('two words',
-             ['two', ' ', 'words']),
-            ('entity&quot;s',
-             ['entity', '&quot;', 's']),
-            ("we're excited",
-             ["we're", " ", "excited"]),
-            ('dial 1-800-555-1234',
-             ['dial', ' ', '1-800-555-1234']),
-        ]
-        placeholder_cases = [
-            ('{{{<DOM Element: tagname at 0xhexaddress >}}}',
-             ['{{{<DOM Element: tagname at 0xhexaddress >}}}']),
-            ('&nbsp;{{{<DOM Element: tagname at 0xhexaddress >}}}',
-             ['&nbsp;', '{{{<DOM Element: tagname at 0xhexaddress >}}}']),
-            (u'\xa0{{{<DOM Element: tagname at 0xhexaddress >}}}',
-             [u'\xa0', u'{{{<DOM Element: tagname at 0xhexaddress >}}}']),
-            ('{{{{<DOM Element: tagname at 0xhexaddress >}}}',
-             ['{', '{{{<DOM Element: tagname at 0xhexaddress >}}}']),
-        ]
-        for text, target in cases:
-            self.assertEqual(WordMatcher()._split_text(text), target)
-        for text, target in cases + placeholder_cases:
-            self.assertEqual(PlaceholderMatcher()._split_text(text), target)
-
     def test_text_changes(self):
         cases = [
-            ('The quick brown fox jumps over the lazy dog.',
-             'The very quick brown foxes jump over the dog.',
-             'The<ins> very</ins> quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.',
+            (
+                'The quick brown fox jumps over the lazy dog.',
+                'The very quick brown foxes jump over the dog.',
+                'The<ins> very</ins> quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.',
             ),
-            ("we were excited",
-             "we're excited",
-             "<del>we were</del><ins>we're</ins> excited",
+            (
+                "we were excited",
+                "we're excited",
+                "<del>we were</del><ins>we're</ins> excited",
+            ),
+            (
+                'Effective 1/2/2003',
+                'Effective 3/4/2005',
+                'Effective <del>1/2/2003</del><ins>3/4/2005</ins>',
             ),
 # This text diff sucks.
 #            ('''
@@ -240,7 +254,7 @@ class TextChangesTestCase(TestCase):
 #            ),
         ]
         for old, new, changes in cases:
-            self.assertEqual(text_changes(old, new), changes)
+            self.assertEqual(text_changes(old, new, cutoff=0.0), changes)
 
 # since the test cases get automatically reversed, only include insert cases,
 # not delete cases
