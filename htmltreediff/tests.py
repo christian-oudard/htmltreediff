@@ -10,14 +10,12 @@ from nose.tools import assert_equal, assert_raises
 from unittest import TestCase
 
 from htmltreediff import html_changes
-from htmltreediff.html import distribute, fix_lists, fix_tables
 from htmltreediff.cli import main
 from htmltreediff.util import (
     parse_minidom,
     minidom_tostring,
     html_equal,
     get_location,
-    remove_insignificant_text_nodes,
 )
 from htmltreediff.test_util import (
     reverse_edit_script,
@@ -30,117 +28,6 @@ from htmltreediff.test_util import (
     collapse,
     fix_node_locations,
 )
-
-def test_cutoff():
-    changes = html_changes(
-        '<h1>totally</h1>',
-        '<h2>different</h2>',
-        cutoff=0.2,
-    )
-    assert_equal(
-        changes,
-        '<h2>The differences from the previous version are too large to show '
-        'concisely.</h2>',
-    )
-
-def test_illegal_text_nodes():
-    html = '''
-        <table>
-            illegal text
-            <tr>
-                <td>stuff</td>
-            </tr>
-        </table>
-    '''
-    dom = parse_minidom(html)
-    html = minidom_tostring(dom)
-    assert_equal(
-        html,
-        '<html><head/><body> illegal text '
-        '<table><tbody><tr><td>stuff</td></tr></tbody></table></body></html>',
-    )
-
-def test_remove_insignificant_text_nodes():
-    html = dedent('''
-        <html>
-            <head />
-            <body>
-                <p>
-                    one <em>two</em> <strong>three</strong>
-                </p>
-                <table>
-                    <tr>
-                        <td>stuff</td>
-                    </tr>
-                </table>
-            </body>
-        </html>
-    ''')
-    dom = parse_minidom(html)
-    remove_insignificant_text_nodes(dom)
-    html = minidom_tostring(dom)
-    assert_equal(
-        html,
-        '<html><head/><body> <p> one <em>two</em> <strong>three</strong> </p> '
-        '<table><tbody><tr><td>stuff</td></tr></tbody></table> </body></html>',
-    )
-
-    # Check that it is idempotent.
-    dom = parse_minidom(html)
-    remove_insignificant_text_nodes(dom)
-    html = minidom_tostring(dom)
-    assert_equal(
-        html,
-        ('<html><head/><body> <p> one <em>two</em> <strong>three</strong> </p> '
-         '<table><tbody><tr><td>stuff</td></tr></tbody></table> </body></html>'),
-    )
-
-def test_remove_insignificant_text_nodes_nbsp():
-    html = dedent('''
-        <table>
-        <tbody>
-        <tr>
-            <td> </td>
-            <td>&#160;</td>
-            <td>&nbsp;</td>
-        </tr>
-        </tbody>
-        </table>
-    ''')
-    dom = parse_minidom(html)
-    remove_insignificant_text_nodes(dom)
-    html = minidom_tostring(dom)
-    assert_equal(
-        html,
-        ('<html><head/><body><table><tbody><tr><td> </td><td> </td><td> </td>'
-         '</tr></tbody></table></body></html>'),
-    )
-
-def test_html_changes_pretty():
-    cases = [
-        (
-            'Simple Addition',
-            '<h1>one</h1>',
-            '<h1>one</h1><h2>two</h2>',
-            dedent('''
-                <h1>
-                  one
-                </h1>
-                <ins>
-                  <h2>
-                    two
-                  </h2>
-                </ins>
-            ''').strip(),
-        ),
-    ]
-    for test_name, old_html, new_html, pretty_changes in cases:
-        def test():
-            changes = html_changes(old_html, new_html, cutoff=0.0, pretty=True)
-            print changes
-            assert_equal(pretty_changes, changes)
-        test.description = 'test_html_changes_pretty - %s' % test_name
-        yield test
 
 def test_main():
     # Run the command line interface main function.
@@ -869,28 +756,31 @@ all_test_cases = (test_cases +
                   one_way_test_cases +
                   insane_test_cases)
 
+def assert_html_equal(a_html, b_html):
+    assert html_equal(a_html, b_html), (
+        u'These html documents are not equal:\n%r\n====\n%r' % (a_html, b_html))
+
+def assert_html_not_equal(a_html, b_html):
+    assert not html_equal(a_html, b_html), (
+        u'These html documents should not be equal:\n%r\n====\n%r' % (a_html, b_html))
+
 
 class HtmlChangesTestCase(TestCase):
-    def assert_html_equal(self, a_html, b_html):
-        self.assertTrue(html_equal(a_html, b_html), u'These html documents are not equal:\n%r\n====\n%r' % (a_html, b_html))
-
-    def assert_html_not_equal(self, a_html, b_html):
-        self.assertFalse(html_equal(a_html, b_html), u'These html documents should not be equal:\n%r\n====\n%r' % (a_html, b_html))
 
     def assert_strip_changes(self, old_html, new_html, changes):
-        self.assert_html_equal(old_html, strip_changes_old(changes))
-        self.assert_html_equal(new_html, strip_changes_new(changes))
+        assert_html_equal(old_html, strip_changes_old(changes))
+        assert_html_equal(new_html, strip_changes_new(changes))
 
     def test_parse_comments(self):
-        self.assert_html_equal(
+        assert_html_equal(
             minidom_tostring(parse_minidom('<!-- -->')),
             '',
         )
-        self.assert_html_equal(
+        assert_html_equal(
             minidom_tostring(parse_minidom('<!--\n-->')),
             '',
         )
-        self.assert_html_equal(
+        assert_html_equal(
             minidom_tostring(parse_minidom('<p>stuff<!-- \n -->stuff</p>')),
             '<p>stuffstuff</p>',
         )
@@ -913,7 +803,7 @@ class HtmlChangesTestCase(TestCase):
              '<div></div>\r\n'),
         ]
         for a_html, b_html in html_equal_cases:
-            self.assert_html_equal(a_html, b_html)
+            assert_html_equal(a_html, b_html)
 
     def test_html_not_equal(self):
         html_not_equal_cases = [
@@ -931,7 +821,7 @@ class HtmlChangesTestCase(TestCase):
              '<ol><li>A</li></ol>'),
         ]
         for a_html, b_html in html_not_equal_cases:
-            self.assert_html_not_equal(a_html, b_html)
+            assert_html_not_equal(a_html, b_html)
 
     def test_remove_attributes(self):
         remove_attributes_cases = [
@@ -947,7 +837,7 @@ class HtmlChangesTestCase(TestCase):
              u'<h1>\xc3\xbcber</h1>'),
         ]
         for html, stripped_html, in remove_attributes_cases:
-            self.assert_html_equal(remove_attributes(html), stripped_html)
+            assert_html_equal(remove_attributes(html), stripped_html)
 
     def test_cases_sanity(self):
         # check that removing the ins and del markup gives the original
@@ -990,7 +880,7 @@ class HtmlChangesTestCase(TestCase):
                 edit_script = []
                 edit_script = html_diff(old_html, new_html)
                 edited_html = html_patch(old_html, edit_script)
-                self.assert_html_equal(
+                assert_html_equal(
                     remove_attributes(edited_html),
                     remove_attributes(new_html),
                 )
@@ -1015,7 +905,7 @@ class HtmlChangesTestCase(TestCase):
                 if (old_html, new_html, target_changes, edit_script) not in insane_test_cases:
                     self.assert_strip_changes(old_html, new_html, changes)
                 # test that it matches the expected value
-                self.assert_html_equal(changes, target_changes) # if we fail here, the test case is possibly wrong
+                assert_html_equal(changes, target_changes) # if we fail here, the test case is possibly wrong
         except:
             print
             print 'HtmlChanges failed on:'
@@ -1030,212 +920,3 @@ class HtmlChangesTestCase(TestCase):
             for step in html_diff(old_html, new_html):
                 print step
             raise
-
-    def test_distribute(self):
-        cases = [
-            ('<ins><li>A</li><li><em>B</em></li></ins>',
-             '<li><ins>A</ins></li><li><ins><em>B</em></ins></li>'),
-        ]
-        for original, distributed in cases:
-            original = parse_minidom(original)
-            distributed = parse_minidom(distributed)
-            node = get_location(original, [1, 0])
-            distribute(node)
-            self.assert_html_equal(
-                minidom_tostring(original),
-                minidom_tostring(distributed))
-
-    def test_fix_lists(self):
-        cases = [
-            ( # simple list item insert
-                '''
-                <ol>
-                  <li>one</li>
-                  <ins><li>two</li></ins>
-                </ol>
-                ''',
-                '''
-                <ol>
-                  <li>one</li>
-                  <li><ins>two</ins></li>
-                </ol>
-                '''
-            ),
-            ( # multiple list item insert
-                '''
-                <ol>
-                  <li>one</li>
-                  <ins>
-                    <li>two</li>
-                    <li>three</li>
-                  </ins>
-                </ol>
-                ''',
-                '''
-                <ol>
-                  <li>one</li>
-                  <li><ins>two</ins></li>
-                  <li><ins>three</ins></li>
-                </ol>
-                '''
-            ),
-            ( # simple list item delete afterward
-                '''
-                <ol>
-                  <li>one</li>
-                  <del><li>one and a half</li></del>
-                </ol>
-                ''',
-                '''
-                <ol>
-                  <li>one</li>
-                  <li class="del-li"><del>one and a half</del></li>
-                </ol>
-                '''
-            ),
-            ( # simple list item delete first
-                '''
-                <ol>
-                  <del><li>one half</li></del>
-                  <li>one</li>
-                </ol>
-                ''',
-                '''
-                <ol>
-                  <li class="del-li"><del>one half</del></li>
-                  <li>one</li>
-                </ol>
-                '''
-            ),
-            ( # multiple list item delete first
-                '''
-                <ol>
-                  <del>
-                    <li>one third</li>
-                    <li>two thirds</li>
-                  </del>
-                  <li>one</li>
-                </ol>
-                ''',
-                '''
-                <ol>
-                  <li class="del-li"><del>one third</del></li>
-                  <li class="del-li"><del>two thirds</del></li>
-                  <li>one</li>
-                </ol>
-                '''
-            ),
-            ( # insert and delete separately
-                '''
-                <ol>
-                  <li>one</li>
-                  <ins><li>two</li></ins>
-                  <li>three</li>
-                  <del><li>three point five</li></del>
-                  <li>four</li>
-                </ol>
-                ''',
-                '''
-                <ol>
-                  <li>one</li>
-                  <li><ins>two</ins></li>
-                  <li>three</del>
-                  <li class="del-li"><del>three point five</del></li>
-                  <li>four</li>
-                </ol>
-                '''
-            ),
-            ( # multiple list item delete
-                '''
-                <ol>
-                  <li>one</li>
-                  <del>
-                    <li>two</li>
-                    <li>three</li>
-                  </del>
-                </ol>
-                ''',
-                '''
-                <ol>
-                  <li>one</li>
-                  <li class="del-li"><del>two</del></li>
-                  <li class="del-li"><del>three</del></li>
-                </ol>
-                '''
-            ),
-            ( # delete only list item
-                '''
-                <ol>
-                  <del>
-                    <li>one</li>
-                  </del>
-                </ol>
-                ''',
-                '''
-                <ol>
-                  <li class="del-li"><del>one</del></li>
-                </ol>
-                '''
-            ),
-        ]
-        for changes, fixed_changes in cases:
-            changes = collapse(changes)
-            fixed_changes = collapse(fixed_changes)
-            changes_dom = parse_minidom(changes)
-            fix_lists(changes_dom)
-            self.assert_html_equal(minidom_tostring(changes_dom), fixed_changes)
-
-    def test_fix_tables(self):
-        cases = [
-            ( # add a table row
-                '''
-                <table>
-                  <tr><td>A</td></tr>
-                  <ins><tr><td>B</td></tr></ins>
-                </table>
-                ''',
-                '''
-                <table>
-                  <tr><td>A</td></tr>
-                  <tr><td><ins>B</ins></td></tr>
-                </table>
-                '''
-            ),
-            ( # remove ins and del tags at the wrong level of the table
-                '''
-                <table>
-                    <ins> </ins><del> </del>
-                    <thead>
-                        <ins> </ins><del> </del>
-                    </thead>
-                    <tfoot>
-                        <ins> </ins><del> </del>
-                    </tfoot>
-                    <tbody>
-                        <ins> </ins><del> </del>
-                        <tr>
-                            <ins> </ins><del> </del>
-                            <td><ins>A</ins></td>
-                        </tr>
-                    </tbody>
-                </table>
-                ''',
-                '''
-                <table>
-                    <thead></thead>
-                    <tfoot></tfoot>
-                    <tbody>
-                        <tr>
-                            <td><ins>A</ins></td>
-                        </tr>
-                    </tbody>
-                </table>
-                ''',
-            ),
-        ]
-        for changes, fixed_changes in cases:
-            changes = collapse(changes)
-            fixed_changes = collapse(fixed_changes)
-            changes_dom = parse_minidom(changes, html=False)
-            fix_tables(changes_dom)
-            self.assert_html_equal(minidom_tostring(changes_dom), fixed_changes)
