@@ -2,7 +2,7 @@ import re, cgi
 from collections import defaultdict
 from xml.dom import minidom
 
-from htmltreediff.text import text_changes, wrap_html, PlaceholderMatcher
+from htmltreediff.text import split_text
 from htmltreediff.util import (
     is_text,
     is_element,
@@ -18,7 +18,28 @@ from htmltreediff.util import (
 from htmltreediff.diff import Differ
 from htmltreediff.edit_script_runner import EditScriptRunner
 
+def split_text_nodes(dom):
+    for text_node in list(walk_dom(dom)):
+        if not is_text(text_node):
+            continue
+        split_node(text_node)
+
+def split_node(node):
+    # Split text node in into user-friendly chunks.
+    pieces = split_text(node.nodeValue)
+    if len(pieces) <= 1:
+        return
+    parent = node.parentNode
+    for piece in pieces:
+        piece_node = node.ownerDocument.createTextNode(piece)
+        parent.insertBefore(piece_node, node)
+    remove_node(node)
+
 def dom_changes(old_dom, new_dom):
+    # Split all the text nodes in the old and new dom.
+    split_text_nodes(old_dom)
+    split_text_nodes(new_dom)
+
     # Get the edit script from the diff algorithm
     differ = Differ(old_dom, new_dom)
     edit_script = differ.get_edit_script()
@@ -33,74 +54,6 @@ def add_changes_markup(dom, ins_nodes, del_nodes):
     """
     Add <ins> and <del> tags to the dom to show changes.
     """
-    # find text-only changes
-    text_only = []
-    del_locations = defaultdict(list)
-    ins_locations = defaultdict(list)
-    for node in del_nodes:
-        del_locations[(node.orig_parent, node.orig_next_sibling)].append(node)
-    for node in ins_nodes:
-        ins_locations[(node.orig_parent, node.orig_next_sibling)].append(node)
-    for location, del_node_list in del_locations.items():
-        parent, next_sibling = location
-        if not location in ins_locations:
-            continue # must be deleted and inserted in same location
-        ins_node_list = ins_locations[location]
-        if not (any(is_text(n) for n in del_node_list) and
-                any(is_text(n) for n in ins_node_list)):
-            continue # must be at least one text node on each side
-        # remove the changed nodes from the original lists
-        for node in del_node_list:
-            del_nodes.remove(node)
-        for node in ins_node_list:
-            ins_nodes.remove(node)
-            # remove inserted nodes from dom too
-            assert node.parentNode is not None
-            remove_node(node)
-        # represent elements as placeholder strings, and replace them with
-        # the real objects later
-        node_placeholders = {}
-        def strvalue(node):
-            if is_text(node):
-                s = node.nodeValue
-            else:
-                r = repr(node)
-                node_placeholders[r] = node
-                s = '{{{' + r + '}}}'
-            return cgi.escape(s)
-        old_text = ''.join(strvalue(n) for n in reversed(del_node_list))
-        new_text = ''.join(strvalue(n) for n in ins_node_list)
-        text_only.append((
-            old_text,
-            new_text,
-            parent,
-            next_sibling,
-            node_placeholders,
-        ))
-    # add markup for text-only changes
-    for old_text, new_text, parent, next_sibling, node_placeholders in text_only:
-        diff = text_changes(old_text, new_text, matcher_class=PlaceholderMatcher)
-        # parse the diff
-        diff = wrap_html(diff, 'diff')
-        diff_dom = minidom.parseString(diff.encode('utf-8'))
-        diff_nodes = list(diff_dom.documentElement.childNodes)
-        # apply the diff
-        for diff_node in diff_nodes:
-            # insert the diff into the document
-            insert_or_append(parent, diff_node, next_sibling)
-            # put the old objects back in their place
-            for text_node in list(walk_dom(diff_node)):
-                if not is_text(text_node):
-                    continue
-                # there might be multiple placeholders in each text node
-                while True:
-                    m = re.search(r'{{{(.*?)}}}', text_node.nodeValue)
-                    if not m:
-                        break
-                    real_node = node_placeholders[m.group(1)]
-                    before_, deleted_, after = remove_text_section(text_node, m.start(), m.end())
-                    insert_or_append(after.parentNode, real_node, after)
-                    text_node = after
     # add markup for inserted and deleted sections
     for node in reversed(del_nodes):
         # diff algorithm deletes nodes in reverse order, so un-reverse the

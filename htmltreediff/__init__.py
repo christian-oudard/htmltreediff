@@ -3,16 +3,16 @@ HTML Tree Diff
 
 Basic Usage
 >>> from htmltreediff import html_changes
->>> print html_changes('<h1>one</h1>', '<h1>two</h1>')
-<h1><del>one</del><ins>two</ins></h1>
->>> print html_changes('<h1>one</h1>', '<h1>two</h1>', pretty=True)
+>>> print html_changes('<h1>...one...</h1>', '<h1>...two...</h1>', pretty=True)
 <h1>
+  ...
   <del>
     one
   </del>
   <ins>
     two
   </ins>
+  ...
 </h1>
 
 Text Diff Usage

@@ -4,6 +4,8 @@ import html5lib
 from html5lib import treebuilders
 from xml.dom import minidom, Node
 
+from htmltreediff.text import WordMatcher
+
 ## DOM utilities ##
 # parsing and cleaning #
 def parse_minidom(xml, clean=True, html=True):
@@ -93,6 +95,9 @@ class HashableNode(object):
                 self.node.nodeValue == other.node.nodeValue and
                 attribute_dict(self.node) == attribute_dict(other.node))
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __hash__(self):
         attributes = frozenset(attribute_dict(self.node).items())
         return hash((self.node.nodeType,
@@ -112,6 +117,38 @@ class HashableTree(object):
     def __hash__(self):
         child_hashes = hash(tuple(HashableTree(c) for c in self.node.childNodes))
         return hash((HashableNode(self.node), child_hashes))
+
+class FuzzyHashableTree(object):
+    cutoff = 0.4
+
+    def __init__(self, node):
+        self.node = node
+        self.fuzzy_match = False
+
+    def __eq__(self, other):
+        if HashableNode(self.node) != HashableNode(other.node):
+            self.fuzzy_match = False
+            return False
+
+        # Check for an exact tree match.
+        if HashableTree(self.node) == HashableTree(other.node):
+            self.fuzzy_match = False
+            return True
+
+        # Check for a fuzzy match.
+        ratio = tree_text_ratio(self.node, other.node)
+        if ratio >= self.cutoff:
+            self.fuzzy_match = True
+            return True
+
+        self.fuzzy_match = False
+        return False
+
+    def __hash__(self):
+        # This will never be equal if the top level tag in the tree is
+        # different. Beyond that, we can't make any guarantees.
+        return hash(HashableNode(self.node))
+
 
 def attribute_dict(node):
     if not node.attributes:
@@ -217,6 +254,33 @@ def tree_text(node):
         if is_text(descendant):
             text_list.append(descendant.nodeValue)
     return ' '.join(text_list)
+
+def tree_text_ratio(a_dom, b_dom):
+    """Compare two dom trees for text similarity, as a ratio."""
+    matcher = _text_matcher(a_dom, b_dom)
+    return matcher.text_ratio()
+
+def tree_similarity(a_dom, b_dom, cutoff=0.6):
+    """Compare two dom trees for text similarity, as the total length of matching words."""
+    # Nodes that have a different type or tag name are not equal.
+    if not (a_dom.nodeType == b_dom.nodeType == Node.ELEMENT_NODE):
+        return 0
+    if a_dom.tagName != b_dom.tagName:
+        return 0
+
+    matcher = _text_matcher(a_dom, b_dom)
+
+    # If the ratio is above the cutoff, the length of the matching text is the
+    # quality of the match.
+    if matcher.text_ratio() < cutoff:
+        return 0
+    return matcher.match_length()
+
+def _text_matcher(a_dom, b_dom):
+    return WordMatcher(
+        a=tree_text(a_dom),
+        b=tree_text(b_dom),
+    )
 
 # manipulation #
 def copy_dom(dom):

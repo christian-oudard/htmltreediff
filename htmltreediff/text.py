@@ -101,6 +101,8 @@ _word_split_regexes = [
     ),
 ]
 
+def split_text(text):
+    return multi_split(text, _word_split_regexes)
 
 _stopwords = 'a an and as at by for if in it of or so the to'
 _stopwords = set(_stopwords.strip().lower().split())
@@ -155,21 +157,6 @@ class WordMatcher(SequenceMatcher):
             self._text_length(self.a) + self._text_length(self.b),
         )
 
-    def adjusted_text_ratio(self):
-        """
-        Calculate the text ratio adjusted to ignore difference in length of the
-        two sequences.
-
-        >>> '%.3f' % WordMatcher(a='abcd', b='abcd1234').text_ratio()
-        '0.667'
-        >>> '%.3f' % WordMatcher(a='abcd', b='abcd1234').adjusted_text_ratio()
-        '1.000'
-        """
-        return _calculate_ratio(
-            self.match_length(),
-            2 * min(self._text_length(self.a), self._text_length(self.b)),
-        )
-
     def match_length(self):
         """ Find the total length of all words that match between the two sequences."""
         length = 0
@@ -201,7 +188,7 @@ class PlaceholderMatcher(WordMatcher):
         return WordMatcher._word_length(self, word)
 
 
-def text_changes(old_text, new_text, cutoff=0.3, matcher_class=WordMatcher):
+def text_changes(old_text, new_text, cutoff=0.4, matcher_class=WordMatcher):
     """
     Perform a user-friendly text diff, respecting word boundaries, whitespace,
     and punctuation.
@@ -215,7 +202,7 @@ def text_changes(old_text, new_text, cutoff=0.3, matcher_class=WordMatcher):
         changes.append(wrap_html(new_section, 'ins'))
 
     # if text similarity is small, count the whole block as different
-    if matcher.adjusted_text_ratio() < cutoff:
+    if matcher.text_ratio() < cutoff:
         delete(old_text)
         insert(new_text)
         return ''.join(changes)

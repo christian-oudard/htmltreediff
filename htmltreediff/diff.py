@@ -6,6 +6,7 @@ from htmltreediff.util import (
     copy_dom,
     HashableNode,
     HashableTree,
+    FuzzyHashableTree,
     is_text,
     get_child,
     get_location,
@@ -54,49 +55,27 @@ class Differ():
         new_children = list(get_location(self.new_dom, new_location).childNodes)
 
         # All the blocks that are matching in some way. Initialized with a sentinel.
-        combined_blocks = [(len(old_children), len(new_children), 0)]
 
-        # Find whole-tree matches
-        matching_tree_blocks = match_blocks(HashableTree, old_children, new_children)
-        combined_blocks = merge_blocks(combined_blocks, matching_tree_blocks)
+        # Find whole-tree matches and fuzzy matches.
+        sm = match_blocks(FuzzyHashableTree, old_children, new_children)
 
-        # In each gap between matching trees, find text-similar matches.
-        gaps = nonmatching_blocks(matching_tree_blocks)
-        matching_similar_blocks = []
-        for nonmatch in gaps:
-            alo, ahi, blo, bhi = nonmatch
-            similar_blocks = similar_matches(
-                old_children[alo:ahi],
-                new_children[blo:bhi],
-                tree_similarity,
-            )
-            # Move blocks over to the position of the gap.
-            similar_blocks = [(alo + a, blo + b, size) for a, b, size in similar_blocks]
-            matching_similar_blocks.extend(similar_blocks)
-        combined_blocks = merge_blocks(combined_blocks, matching_similar_blocks)
+        # If the match is very poor, pretend there were no exact matching blocks at all.
+        if sm.ratio() < 0.3:
+            matching_blocks = [(len(old_children), len(new_children), 0)]
+        else:
+            matching_blocks = sm.get_matching_blocks()
 
-        # In each gap between matching trees or text-similar matches, find node-only matches.
-        gaps = nonmatching_blocks(merge_blocks(matching_tree_blocks,
-                                                 matching_similar_blocks))
-        matching_node_blocks = []
-        for nonmatch in gaps:
-            alo, ahi, blo, bhi = nonmatch
-            node_blocks = match_blocks(
-                HashableNode,
-                old_children[alo:ahi],
-                new_children[blo:bhi],
-            )
-            # Move blocks over to the position of the gap.
-            node_blocks = [(alo + a, blo + b, size) for a, b, size in node_blocks]
-            matching_node_blocks.extend(node_blocks)
-        combined_blocks = merge_blocks(combined_blocks, matching_node_blocks)
-
-        # We will recurse on everything that matches at this level, but not at
-        # deeper levels.
-        recursion_blocks = merge_blocks(matching_similar_blocks, matching_node_blocks)
+        # We will recurse on each tree that was a fuzzy match at this level.
+        recursion_indices = [] # List of tuples, (old_index, new_index)
+        for match in matching_blocks:
+            for old_index, new_index in match_indices(match):
+                old_node = sm.a[old_index]
+                new_node = sm.b[new_index]
+                if new_node.fuzzy_match or old_node.fuzzy_match:
+                    recursion_indices.append((old_index, new_index))
 
         # Apply changes for this level.
-        for tag, i1, i2, j1, j2 in adjusted_ops(get_opcodes(combined_blocks)):
+        for tag, i1, i2, j1, j2 in adjusted_ops(get_opcodes(matching_blocks)):
             if tag == 'delete':
                 assert j1 == j2
                 # delete range from right to left
@@ -109,12 +88,11 @@ class Differ():
                 for index, child in enumerate(new_children[j1:j2]):
                     self.insert(new_location + [i1 + index], child)
                     old_children.insert(i1 + index, child)
-            recursion_blocks = list(adjust_blocks(recursion_blocks, i1, i2, j1, j2))
+            recursion_indices = list(adjust_indices(recursion_indices, i1, i2, j1, j2))
 
         # Recurse to deeper level.
-        for match in recursion_blocks:
-            for old_index, new_index in match_indices(match):
-                self.diff_location(old_location + [old_index], new_location + [new_index])
+        for old_index, new_index in recursion_indices:
+            self.diff_location(old_location + [old_index], new_location + [new_index])
 
     def delete(self, location, node):
         # delete from the bottom up, children before parent, right to left
@@ -236,34 +214,7 @@ def match_blocks(hash_func, old_children, new_children):
         [hash_func(c) for c in old_children],
         [hash_func(c) for c in new_children],
     )
-    return sm.get_matching_blocks()
-
-def tree_text_ratio(a_dom, b_dom):
-    """Compare two dom trees for text similarity, as a ratio."""
-    matcher = _text_matcher(a_dom, b_dom)
-    return matcher.text_ratio()
-
-def tree_similarity(a_dom, b_dom, cutoff=0.6):
-    """Compare two dom trees for text similarity, as the total length of matching words."""
-    # Nodes that have a different type or tag name are not equal.
-    if not (a_dom.nodeType == b_dom.nodeType == Node.ELEMENT_NODE):
-        return 0
-    if a_dom.tagName != b_dom.tagName:
-        return 0
-
-    matcher = _text_matcher(a_dom, b_dom)
-
-    # If the ratio is above the cutoff, the length of the matching text is the
-    # quality of the match.
-    if matcher.text_ratio() < cutoff:
-        return 0
-    return matcher.match_length()
-
-def _text_matcher(a_dom, b_dom):
-    return WordMatcher(
-        a=tree_text(a_dom),
-        b=tree_text(b_dom),
-    )
+    return sm
 
 def similar_matches(a_seq, b_seq, eq_weight, cutoff=0.4):
     """
@@ -333,10 +284,10 @@ def merge_blocks(a_blocks, b_blocks):
         j = b + size
     return combined_blocks
 
-def adjust_blocks(blocks, i1, i2, j1, j2):
+def adjust_indices(indices, i1, i2, j1, j2):
     shift = (j2 - j1) - (i2 - i1)
-    for a, b, size in blocks:
+    for a, b in indices:
         if a >= i2:
             a += shift
-        yield (a, b, size)
+        yield a, b
 

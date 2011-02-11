@@ -16,26 +16,10 @@ def test_text_split():
         ('Effective 1/2/2003',
          ['Effective', ' ', '1/2/2003']),
     ]
-    placeholder_cases = [
-        ('{{{<DOM Element: tagname at 0xhexaddress >}}}',
-         ['{{{<DOM Element: tagname at 0xhexaddress >}}}']),
-        ('&nbsp;{{{<DOM Element: tagname at 0xhexaddress >}}}',
-         ['&nbsp;', '{{{<DOM Element: tagname at 0xhexaddress >}}}']),
-        ('\xa0{{{<DOM Element: tagname at 0xhexaddress >}}}',
-         ['\xa0', u'{{{<DOM Element: tagname at 0xhexaddress >}}}']),
-        ('{{{{<DOM Element: tagname at 0xhexaddress >}}}',
-         ['{', '{{{<DOM Element: tagname at 0xhexaddress >}}}']),
-    ]
     for text, target in cases:
         def test():
             assert_equal(WordMatcher()._split_text(text), target)
         yield test
-    for text, target in cases + placeholder_cases:
-        def test():
-            assert_equal(PlaceholderMatcher()._split_text(text), target)
-        test.description = 'test_text_split with placeholder - %s' % text
-        yield test
-
 
 def test_text_changes():
     cases = [

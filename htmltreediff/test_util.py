@@ -3,6 +3,7 @@ from copy import copy
 from htmltreediff.diff import Differ
 from htmltreediff.edit_script_runner import EditScriptRunner
 from htmltreediff.changes import (
+    split_text_nodes,
     sort_del_before_ins,
     _strip_changes_new,
     _strip_changes_old,
@@ -14,6 +15,8 @@ from htmltreediff.util import (
 )
 
 def reverse_edit_script(edit_script):
+    if edit_script is None:
+        return None
     def opposite_action(action):
         if action == 'delete':
             return 'insert'
@@ -37,12 +40,18 @@ def reverse_changes(dom):
             node.tagName = 'del'
     sort_del_before_ins(dom)
 
-def html_diff(old_html, new_html):
-    differ = Differ(parse_minidom(old_html), parse_minidom(new_html))
+def get_edit_script(old_html, new_html):
+    old_dom = parse_minidom(old_html)
+    new_dom = parse_minidom(new_html)
+    split_text_nodes(old_dom)
+    split_text_nodes(new_dom)
+    differ = Differ(old_dom, new_dom)
     return differ.get_edit_script()
 
 def html_patch(old_html, edit_script):
-    runner = EditScriptRunner(parse_minidom(old_html), edit_script)
+    old_dom = parse_minidom(old_html)
+    split_text_nodes(old_dom)
+    runner = EditScriptRunner(old_dom, edit_script)
     return minidom_tostring(runner.run_edit_script())
 
 def strip_changes_old(html):
@@ -64,11 +73,32 @@ def collapse(html):
     """Remove any indentation and newlines from the html."""
     return ''.join([line.strip() for line in html.split('\n')]).strip()
 
+class Case(object):
+    pass
+
+def parse_cases(cases):
+    for args in cases:
+        case = Case()
+        if len(args) == 4:
+            case.name, case.old_html, case.new_html, case.target_changes = args
+            case.edit_script = None
+        else:
+            case.name, case.old_html, case.new_html, case.target_changes, case.edit_script = args
+        yield case
+
 def fix_node_locations(test_cases):
     """Fix node locations in test cases."""
-    for name, old_html, new_html, target_changes, edit_script in copy(test_cases):
+    for case in parse_cases(test_cases):
+        if case.edit_script is None:
+            yield (
+                case.name,
+                case.old_html,
+                case.new_html,
+                case.target_changes,
+            )
+            continue
         new_edit_script = []
-        for action, location, node_properties in edit_script:
+        for action, location, node_properties in case.edit_script:
             location = [1] + location # account for auto-added head and body elements
             new_edit_script.append((
                 action,
@@ -76,9 +106,9 @@ def fix_node_locations(test_cases):
                 node_properties,
             ))
         yield (
-            name,
-            old_html,
-            new_html,
-            target_changes,
+            case.name,
+            case.old_html,
+            case.new_html,
+            case.target_changes,
             new_edit_script,
         )

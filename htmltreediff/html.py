@@ -1,14 +1,14 @@
-from htmltreediff.diff import tree_text_ratio
 from htmltreediff.util import (
     parse_minidom,
     minidom_tostring,
     unwrap,
     wrap_inner,
     remove_node,
+    tree_text_ratio,
 )
 from htmltreediff.changes import dom_changes, distribute
 
-def html_changes(old_html, new_html, cutoff=0.0, pretty=False):
+def html_changes(old_html, new_html, cutoff=0.0, html=True, pretty=False):
     """Show the differences between the old and new html document, as html.
 
     Return the document html with extra tags added to show changes. Add <ins>
@@ -26,8 +26,10 @@ def html_changes(old_html, new_html, cutoff=0.0, pretty=False):
     dom = dom_changes(old_dom, new_dom)
 
     # HTML-specific cleanup.
-    fix_lists(dom)
-    fix_tables(dom)
+    if html:
+        fix_lists(dom)
+        fix_tables(dom)
+
     # Only return html for the document body contents.
     body = dom.getElementsByTagName('body')[0]
     return minidom_tostring(body, pretty=pretty)
