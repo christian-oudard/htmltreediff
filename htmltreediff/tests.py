@@ -63,13 +63,15 @@ def test_main():
 # since the test cases get automatically reversed, only include insert cases,
 # not delete cases
 test_cases = [ # test case = (old html, new html, inline changes, edit script)
-    ( # no changes
+    (
+        'no changes',
         '<h1>one</h1>',
         '<h1>one</h1>',
         '<h1>one</h1>',
         [],
     ),
-    ( # simple insert
+    (
+        'simple insert',
         '<h1>one</h1>',
         '<h1>one</h1><h2>two</h2>',
         '<h1>one</h1><ins><h2>two</h2></ins>',
@@ -78,7 +80,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'two'}),
         ]
     ),
-    ( # insert empty element
+    (
+        'insert empty element',
         '',
         '<div></div>',
         '<ins><div></div></ins>',
@@ -86,7 +89,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0], {'node_type': Node.ELEMENT_NODE, 'node_name': u'div'}),
         ]
     ),
-    ( # insert empty element, short notation
+    (
+        'insert empty element, short notation',
         '',
         '<div/>',
         '<ins><div/></ins>',
@@ -94,7 +98,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0], {'node_type': Node.ELEMENT_NODE, 'node_name': u'div'}),
         ]
     ),
-    ( # insert empty element, with newline
+    (
+        'insert empty element, with newline',
         '\n',
         '<div></div>\n',
         '<ins><div></div></ins>\n',
@@ -102,7 +107,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0], {'node_type': Node.ELEMENT_NODE, 'node_name': u'div'}),
         ]
     ),
-    ( # insert empty element, with dos newline
+    (
+        'insert empty element, with dos newline',
         '\r\n',
         '<div></div>\r\n',
         '<ins><div></div></ins>\r\n',
@@ -110,13 +116,15 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0], {'node_type': Node.ELEMENT_NODE, 'node_name': u'div'}),
         ]
     ),
-    ( # space after empty tag
+    (
+        'space after empty tag',
         u'',
         u'<ol><li><span></span> </li></ol>',
         u'<ins><ol><li><span></span> </li></ol></ins>',
         [],
     ),
-    ( # simple insert with tail text
+    (
+        'simple insert with tail text',
         'tail',
         '<h1>one</h1>tail',
         '<ins><h1>one</h1></ins>tail',
@@ -125,7 +133,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'one'}),
         ]
     ),
-    ( # simple insert with several siblings, and tail text
+    (
+        'simple insert with several siblings, and tail text',
         '<h1>one</h1>tail',
         '<h1>one</h1><h2>two</h2>tail',
         '<h1>one</h1><ins><h2>two</h2></ins>tail',
@@ -134,7 +143,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'two'}),
         ]
     ),
-    ( # insert before
+    (
+        'insert before',
         '<h1>one</h1>',
         '<h2>two</h2><h1>one</h1>',
         '<ins><h2>two</h2></ins><h1>one</h1>',
@@ -143,7 +153,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'two'}),
         ]
     ),
-    ( # simple node replace
+    (
+        'simple node replace',
         '<h1>one</h1>',
         '<h2>two</h2>',
         '<del><h1>one</h1></del><ins><h2>two</h2></ins>',
@@ -154,7 +165,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'two'}),
         ]
     ),
-    ( # delete and insert separately
+    (
+        'delete and insert separately',
         '<h1>one</h1><h2>two</h2>',
         '<h2>two</h2><h3>three</h3>',
         '<del><h1>one</h1></del><h2>two</h2><ins><h3>three</h3></ins>',
@@ -165,7 +177,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'three'}),
         ]
     ),
-    ( # simple node replace with tail text
+    (
+        'simple node replace with tail text',
         '<h1>one</h1>tail',
         '<h2>two</h2>tail',
         '<del><h1>one</h1></del><ins><h2>two</h2></ins>tail',
@@ -176,7 +189,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'two'}),
         ]
     ),
-    ( # multiple node insert
+    (
+        'multiple node insert',
         '<h3>three</h3>',
         '<h1>one</h1><h2>two</h2><h3>three</h3>',
         '<ins><h1>one</h1><h2>two</h2></ins><h3>three</h3>',
@@ -187,7 +201,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'two'}),
         ]
     ),
-    ( # multiple node replace
+    (
+        'multiple node replace',
         '<h1>one</h1><h2>two</h2>',
         '<h3>three</h3><h4>four</h4>',
         '<del><h1>one</h1><h2>two</h2></del><ins><h3>three</h3><h4>four</h4></ins>',
@@ -202,7 +217,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'four'}),
         ]
     ),
-    ( # multiple node replace with extra text
+    (
+        'multiple node replace with extra text',
         'before<h1>one</h1><h2>two</h2>after',
         'before<h3>three</h3><h4>four</h4>after',
         'before<del><h1>one</h1><h2>two</h2></del><ins><h3>three</h3><h4>four</h4></ins>after',
@@ -217,7 +233,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [2, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'four'}),
         ]
     ),
-    ( # multiple node replace with filler in between
+    (
+        'multiple node replace with filler in between',
         '<h1>one</h1>filler<h2>two</h2>',
         '<h3>three</h3>filler<h4>four</h4>',
         '<del><h1>one</h1></del><ins><h3>three</h3></ins>filler<del><h2>two</h2></del><ins><h4>four</h4></ins>',
@@ -232,7 +249,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [2, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'four'}),
         ]
     ),
-    ( # add before, same markup content
+    (
+        'add before, same markup content',
         '<h1><em>xxx</em></h1>',
         '<h2><em>xxx</em></h2><h1><em>xxx</em></h1>',
         '<ins><h2><em>xxx</em></h2></ins><h1><em>xxx</em></h1>',
@@ -242,7 +260,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'xxx'}),
         ]
     ),
-    ( # deep level change
+    (
+        'deep level change',
         '<div><h1>one</h1></div>',
         '<div><h1>one</h1><h2>two</h2></div>',
         '<div><h1>one</h1><ins><h2>two</h2></ins></div>',
@@ -251,7 +270,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'two'}),
         ]
     ),
-    ( # simple text insert
+    (
+        'simple text insert',
         '<h1>one</h1><h2>two</h2>',
         '<h1>one</h1>test<h2>two</h2>',
         '<h1>one</h1><ins>test</ins><h2>two</h2>',
@@ -259,7 +279,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [1], {'node_type': Node.TEXT_NODE, 'node_value': u'test'}),
         ]
     ),
-    ( # simple text change
+    (
+        'simple text change',
         '<h1>old</h1>',
         '<h1>new</h1>',
         '<h1><del>old</del><ins>new</ins></h1>',
@@ -268,7 +289,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'new'}),
         ]
     ),
-    ( # insert text before
+    (
+        'insert text before',
         '<h1>blue</h1>',
         '<h1>red blue</h1>',
         '<h1><ins>red </ins>blue</h1>',
@@ -277,7 +299,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'red blue'}),
         ]
     ),
-    ( # insert text inside text section
+    (
+        'insert text inside text section',
         '<h1>red blue</h1>',
         '<h1>red green blue</h1>',
         '<h1>red <ins>green </ins>blue</h1>',
@@ -286,7 +309,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'red green blue'}),
         ]
     ),
-    ( # change text section
+    (
+        'change text section',
         '<h1>test some stuff</h1>',
         '<h1>test alot of stuff</h1>',
         '<h1>test <del>some</del><ins>alot of</ins> stuff</h1>',
@@ -295,7 +319,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'test alot of stuff'}),
         ]
     ),
-    ( # add tail text
+    (
+        'add tail text',
         '<h1>test</h1>',
         '<h1>test</h1> tail',
         '<h1>test</h1><ins> tail</ins>',
@@ -303,7 +328,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [1], {'node_type': Node.TEXT_NODE, 'node_value': u' tail'}),
         ]
     ),
-    ( # change tail text
+    (
+        'change tail text',
         '<h1>test</h1>apple',
         '<h1>test</h1>banana',
         '<h1>test</h1><del>apple</del><ins>banana</ins>',
@@ -312,7 +338,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [1], {'node_type': Node.TEXT_NODE, 'node_value': u'banana'}),
         ]
     ),
-    ( # add text in between nodes
+    (
+        'add text in between nodes',
         '<h1>one</h1><h2>two</h2>',
         '<h1>one</h1>filler<h2>two</h2>',
         '<h1>one</h1><ins>filler</ins><h2>two</h2>',
@@ -320,7 +347,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [1], {'node_type': Node.TEXT_NODE, 'node_value': u'filler'}),
         ]
     ),
-    ( # simple tag rename
+    (
+        'simple tag rename',
         '<h1>test</h1>',
         '<h2>test</h2>',
         '<del><h1>test</h1></del><ins><h2>test</h2></ins>',
@@ -331,7 +359,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'test'}),
         ]
     ),
-    ( # add before, same text content
+    (
+        'add before, same text content',
         '<h1>test</h1>',
         '<h2>test</h2><h1>test</h1>',
         '<ins><h2>test</h2></ins><h1>test</h1>',
@@ -340,7 +369,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'test'}),
         ]
     ),
-    ( # complex text change
+    (
+        'complex text change',
         '<h1>The quick brown fox jumps over the lazy dog</h1>',
         '<h1>The very quick red fox jumps over the dog again</h1>',
         '<h1>The<ins> very</ins> quick <del>brown</del><ins>red</ins> fox jumps over the <del>lazy </del>dog<ins> again</ins></h1>',
@@ -349,7 +379,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'The very quick red fox jumps over the dog again'}),
         ]
     ),
-    ( # sub-word-boundary text change
+    (
+        'sub-word-boundary text change',
         '<h1>The quick brown fox jumps over the lazy dog</h1>',
         '<h1>The very quick brown foxes jump over the dog</h1>',
         '<h1>The<ins> very</ins> quick brown <del>fox jumps</del><ins>foxes jump</ins> over the <del>lazy </del>dog</h1>',
@@ -358,97 +389,113 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'The very quick brown foxes jump over the dog'}),
         ]
     ),
-    ( # insert markup with text before a text section
+    (
+        'insert markup with text before a text section',
         '<h1>blue</h1>',
         '<h1><em>green</em> blue</h1>',
         '<h1><ins><em>green</em> </ins>blue</h1>',
         [],
     ),
-    ( # insert markup with text inside a text section
+    (
+        'insert markup with text inside a text section',
         '<h1>red blue</h1>',
         '<h1>red <em>green</em> blue</h1>',
         '<h1>red <ins><em>green</em> </ins>blue</h1>',
         [],
     ),
-    ( # insert multiple markup in a text section
+    (
+        'insert multiple markup in a text section',
         '<h1>red blue</h1>',
         '<h1>red <em>green</em> blue <b>yellow</b></h1>',
         '<h1>red <ins><em>green</em> </ins>blue<ins> <b>yellow</b></ins></h1>',
         [],
     ),
-    ( # insert multiple markup in a changing text section
+    (
+        'insert multiple markup in a changing text section',
         '<h1>red yellow</h1>',
         '<h1>orange red <em>green</em><b>blue</b> yellow white</h1>',
         '<h1><ins>orange </ins>red <ins><em>green</em><b>blue</b> </ins>yellow<ins> white</ins></h1>',
         [],
     ),
-    ( # add markup around a text section
+    (
+        'add markup around a text section',
         '<h1>red green blue</h1>',
         '<h1>red <em>green</em> blue</h1>',
         '<h1>red <del>green</del><ins><em>green</em></ins> blue</h1>',
         [],
     ),
-    ( # delete markup and text together
+    (
+        'delete markup and text together',
         '<h1>red <em>green</em> blue yellow</h1>',
         '<h1>red yellow</h1>',
         '<h1>red <del><em>green</em> blue </del>yellow</h1>',
         [],
     ),
-    ( # change markup and make complex text changes together
+    (
+        'change markup and make complex text changes together',
         '<h1>The quick brown fox jumps over the lazy dog</h1>',
         '<h1>The very quick <b>brown</b> foxes jump over the dog</h1>',
         '<h1>The<ins> very</ins> quick <del>brown fox jumps</del><ins><b>brown</b> foxes jump</ins> over the <del>lazy </del>dog</h1>',
         [],
     ),
-    ( # change markup and text together
+    (
+        'change markup and text together',
         '<h1>red <em>green</em> blue yellow</h1>',
         '<h1>red green <b>blue</b> yellow</h1>',
         '<h1>red <del><em>green</em> blue</del><ins>green <b>blue</b></ins> yellow</h1>',
         [],
     ),
-    ( # separate text and markup changes
+    (
+        'separate text and markup changes',
         '<h1>red blue</h1><h2>two</h2>',
         '<h1>reds blue yellow</h1><h2><b>two</b></h2>',
         '<h1><del>red</del><ins>reds</ins> blue<ins> yellow</ins></h1><h2><del>two</del><ins><b>two</b></ins></h2>',
         [],
     ),
-    ( # text changes before, inside, and after a block tag
+    (
+        'text changes before, inside, and after a block tag',
         '<h1>red <div>green</div> blue yellow</h1>',
         '<h1>red orange <div>purple</div> yellow</h1>',
         '<h1>red <ins>orange </ins><div><del>green</del><ins>purple</ins></div><del> blue</del> yellow</h1>',
         [],
     ),
-    ( # change markup inside text change
+    (
+        'change markup inside text change',
         '<div>one <div>two</div> three</div>',
         '<div>almostone, one and a half, <div>almost <em>two</em></div> three four</div>',
         '<div><ins>almostone, </ins>one <ins>and a half, </ins><div><del>two</del><ins>almost <em>two</em></ins></div> three<ins> four</ins></div>',
         [],
     ),
-    ( # ensure that &nbsp; doesn't mess up text diff
+    (
+        "ensure that &nbsp; doesn't mess up text diff",
         '<div>x</div>',
         '<div>&nbsp;<b>x</b></div>',
         '<div><del>x</del><ins>&nbsp;<b>x</b></ins></div>',
         [],
     ),
-    ( # text diff with <
+    (
+        'text diff with <',
         'x',
         '&lt;',
         '<del>x</del><ins>&lt;</ins>',
         [],
     ),
-    ( # text diff with >
+    (
+        'text diff with >',
         'x',
         '&gt;',
         '<del>x</del><ins>&gt;</ins>',
         [],
     ),
-    ( # text diff with &
+    (
+        'text diff with &',
         'x',
         '&amp;',
         '<del>x</del><ins>&amp;</ins>',
         [],
     ),
-    ( # unicode text
+    (
+        'unicode text',
         u'<h1>uber</h1>',
         u'<h1>\xc3\xbcber</h1>',
         u'<h1><del>uber</del><ins>\xc3\xbcber</ins></h1>',
@@ -457,25 +504,29 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [0, 0], {'node_type': 3, 'node_value': u'\xc3\xbcber'}),
         ]
     ),
-    ( # bug #1463
+    (
+        'bug #1463',
         '<p><br />yyy</p>',
         '<p><b>xxx</b>yyy<br /></p>',
         '<p><del><br/></del><ins><b>xxx</b></ins>yyy<ins><br/></ins></p>',
         [],
     ),
-    ( # crossing node and tree matches
+    (
+        'crossing node and tree matches',
         '<h1>xxx</h1><h1>YYY</h1><h1>YYY</h1><h2>xxx</h2>',
         '<h2>xxx</h2><h1>YYY</h1><h1>YYY</h1><h1>xxx</h1>',
         '<del><h1>xxx</h1></del><ins><h2>xxx</h2></ins><h1>YYY</h1><h1>YYY</h1><del><h2>xxx</h2></del><ins><h1>xxx</h1></ins>',
         [],
     ),
-    ( # text normalization
+    (
+        'text normalization',
         'first <h1>middle</h1> last',
         'first last',
         'first <del><h1>middle</h1> </del>last',
         [],
     ),
-    ( # index in lower levels being affected by changes in upper levels
+    (
+        'index in lower levels being affected by changes in upper levels',
         '<p><em>zzz</em></p>',
         '<h1>xxx</h1><p>yyy</p>',
         '<ins><h1>xxx</h1></ins><p><del><em>zzz</em></del><ins>yyy</ins></p>',
@@ -487,55 +538,64 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('insert', [1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'yyy'}),
         ]
     ),
-    ( # ignore comments
+    (
+        'ignore comments',
         '',
         '<div/><!--comment one--><!--comment two-->',
         '<ins><div/></ins>',
         [],
     ),
-    ( # ignore style tags
+    (
+        'ignore style tags',
         '',
         '<style type="text/css"></style>',
         '',
         [],
     ),
-    ( # style tag in a block of text
+    (
+        'style tag in a block of text',
         '',
         '<p>xxx<style type="text/css"></style>yyy</p>',
         '<ins><p>xxxyyy</p></ins>',
         [],
     ),
-    ( # near match should override tag-only match
+    (
+        'near match should override tag-only match',
         '<p>delete this</p><p>make a small change in this paragraph</p>',
         '<p>a small change was made in this paragraph</p>',
         '<del><p>delete this</p></del><p><del>make </del>a small change <ins>was made </ins>in this paragraph</p>',
         [],
     ),
-    ( # don't match when similarity is very low
+    (
+        "don't match when similarity is very low",
         '<p>The quick brown fox jumps over the lazy dog</p>',
         '<p>This sentence has nothing to do with the previous one</p>',
         '<p><del>The quick brown fox jumps over the lazy dog</del><ins>This sentence has nothing to do with the previous one</ins></p>',
         [],
     ),
-    ( # another similarity test
+    (
+        'another similarity test',
         '<p>Pass the end of the string under the ring, using the hemostat if necessary.</p>',
         '<p>Take the long end, which is toward the finger, and start wrapping around the finger, starting right against the distal side of the ring, wrapping one wrap after another, continuously, until all the remaining string is used (wrapped around the finger), or until the wraps go at least to, or past the midpoint of the first knuckle.</p>',
         '<p><del>Pass the end of the string under the ring, using the hemostat if necessary.</del><ins>Take the long end, which is toward the finger, and start wrapping around the finger, starting right against the distal side of the ring, wrapping one wrap after another, continuously, until all the remaining string is used (wrapped around the finger), or until the wraps go at least to, or past the midpoint of the first knuckle.</ins></p>',
         [],
     ),
-    ( # *do* match when similarity is very low only because of relative lengths
+    (
+        '*do* match when similarity is very low only because of relative lengths',
         '<p>hey</p>',
         '<p>hey aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>',
         '<p>hey<ins> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</ins></p>',
         [],
     ),
-    ( # changes inside table cells work normally
+    (
+        'changes inside table cells work normally',
         '<table><tr><td>A</td></tr></table>',
         '<table><tr><td>B</td></tr></table>',
         '<table><tr><td><del>A</del><ins>B</ins></td></tr></table>',
         [],
     ),
-    ( # add an image
+    (
+        'add an image',
         '',
         '<img src="image.gif">',
         '<ins><img src="image.gif"></ins>',
@@ -547,7 +607,8 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             }),
         ]
     ),
-    ( # change an image
+    (
+        'change an image',
         '<img src="old.gif">',
         '<img src="new.gif">',
         '<del><img src="old.gif"></del><ins><img src="new.gif"></ins>',
@@ -557,13 +618,15 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
 
 # test cases that should not be run in reverse
 one_way_test_cases = [
-    ( # switch places
+    (
+        'switch places',
         '<h1>one</h1><h2>two</h2>',
         '<h2>two</h2><h1>one</h1>',
         '<ins><h2>two</h2></ins><h1>one</h1><del><h2>two</h2></del>',
         [],
     ),
-    ( # switch places, near match
+    (
+        'switch places, near match',
         '<h1>one one</h1><h2>two two</h2>',
         '<h2>two two x</h2><h1>one one yyy</h1>',
         '<ins><h2>two two x</h2></ins><h1>one one<ins> yyy</ins></h1><del><h2>two two</h2></del>',
@@ -573,74 +636,86 @@ one_way_test_cases = [
 
 # test cases that don't pass sanity checking
 insane_test_cases = [
-    ( # add a table cell
+    (
+        'add a table cell',
         '<table><tr><td>A</td></tr></table>',
         '<table><tr><td>A</td><td>B</td></tr></table>',
         '<table><tr><td>A</td><td><ins>B</ins></td></tr></table>',
         [],
     ),
-    ( # add a table row
+    (
+        'add a table row',
         '<table><tr><td>A</td></tr></table>',
         '<table><tr><td>A</td></tr><tr><td>B</td></tr></table>',
         '<table><tr><td>A</td></tr><tr><td><ins>B</ins></td></tr></table>',
         [],
     ),
-    ( # add table rows and cells, to the bottom and right
+    (
+        'add table rows and cells, to the bottom and right',
         '<table><tr><td>A</td></tr></table>',
         '<table><tr><td>A</td><td>B</td></tr><tr><td>C</td><td>D</td></tr></table>',
         '<table><tr><td>A</td><td><ins>B</ins></td></tr><tr><td><ins>C</ins></td><td><ins>D</ins></td></tr></table>',
         [],
     ),
-    ( # add table rows and cells, to the up and left
+    (
+        'add table rows and cells, to the up and left',
         '<table><tr><td>D</td></tr></table>',
         '<table><tr><td>A</td><td>B</td></tr><tr><td>C</td><td>D</td></tr></table>',
         '<table><tr><td><ins>A</ins></td><td><ins>B</ins></td></tr><tr><td><ins>C</ins></td><td>D</td></tr></table>',
         [],
     ),
-    ( # delete a table cell
+    (
+        'delete a table cell',
         '<table><tr><td>A</td><td>B</td></tr></table>',
         '<table><tr><td>A</td></tr></table>',
         '<table><tr><td>A</td><td><del>B</del></td></tr></table>',
         [],
     ),
-    ( # delete a table row
+    (
+        'delete a table row',
         '<table><tr><td>A</td></tr><tr><td>B</td></tr></table>',
         '<table><tr><td>A</td></tr></table>',
         '<table><tr><td>A</td></tr><tr><td><del>B</del></td></tr></table>',
         [],
     ),
-    ( # delete top row and add a column
+    (
+        'delete top row and add a column',
         '<table><tr><td>A1</td></tr><tr><td>B1</td></tr></table>',
         '<table><tr><td>B1</td><td>B2</td></tr></table>',
         '<table><tr><td><del>A1</del></td></tr><tr><td>B1</td><td><ins>B2</ins></td></tr></table>',
         [],
     ),
-    ( # delete top row and add a column, funny whitespace
+    (
+        'delete top row and add a column, funny whitespace',
         '<table> <tr><td>A1</td></tr> <tr><td>B1</td></tr> </table>',
         '<table> <tr><td>B1</td><td>B2</td></tr> </table>',
         ('<table><tbody><tr><td><del>A1</del></td></tr><tr><td>B1</td>'
          '<td><ins>B2</ins></td></tr></tbody></table>'),
         [],
     ),
-    ( # handle newline-separated words correctly
+    (
+        'handle newline-separated words correctly',
         '<p>line one\nline two</p>',
         '<p>line one line two</p>',
         '<p>line one line two</p>',
         [],
     ),
-    ( # ignore adding attributes
+    (
+        'ignore adding attributes',
         '<h1>one</h1>',
         '<h1 id="ignore" class="ignore">one</h1>',
         '<h1>one</h1>',
         [],
     ),
-    ( # ignore deleting attributes
+    (
+        'ignore deleting attributes',
         '<h1 id="ignore" class="ignore">one</h1>',
         '<h1>one</h1>',
         '<h1 id="ignore" class="ignore">one</h1>',
         [],
     ),
-    ( # whitespace changes in a table with colspan
+    (
+        'whitespace changes in a table with colspan',
         '''
         <table class="table_class">
             <tbody>
@@ -678,7 +753,8 @@ insane_test_cases = [
         '''),
         [],
     ),
-    ( # whitespace changes in a table with nbsp entity
+    (
+        'whitespace changes in a table with nbsp entity',
         '''
         <table>
         <tbody>
@@ -734,8 +810,9 @@ insane_test_cases = [
 # add reverse test cases
 # switch the old and new html, and reverse the changes
 def reverse_cases(cases):
-    for old_html, new_html, target_changes, edit_script in copy(cases):
+    for name, old_html, new_html, target_changes, edit_script in copy(cases):
         yield (
+            name + ' (reverse)',
             new_html,
             old_html,
             reverse_changes_html(target_changes),
@@ -763,159 +840,126 @@ def assert_html_not_equal(a_html, b_html):
     assert not html_equal(a_html, b_html), (
         u'These html documents should not be equal:\n%r\n====\n%r' % (a_html, b_html))
 
+def assert_strip_changes(old_html, new_html, changes):
+    assert_html_equal(old_html, strip_changes_old(changes))
+    assert_html_equal(new_html, strip_changes_new(changes))
 
-class HtmlChangesTestCase(TestCase):
+def test_parse_comments():
+    assert_html_equal(
+        minidom_tostring(parse_minidom('<!-- -->')),
+        '',
+    )
+    assert_html_equal(
+        minidom_tostring(parse_minidom('<!--\n-->')),
+        '',
+    )
+    assert_html_equal(
+        minidom_tostring(parse_minidom('<p>stuff<!-- \n -->stuff</p>')),
+        '<p>stuffstuff</p>',
+    )
 
-    def assert_strip_changes(self, old_html, new_html, changes):
-        assert_html_equal(old_html, strip_changes_old(changes))
-        assert_html_equal(new_html, strip_changes_new(changes))
+def test_html_equal():
+    html_equal_cases = [
+        ('<h1>test</h1>',
+         '<h1>test</h1>'),
+        ('<h1> test</h1>',
+         '<h1> test'),
+        ('<span />',
+         '<span/>'),
+        ('<span></span>',
+         '<span/>'),
+        ('<h1 id="id_test" class="test">test</h1>',
+         '<h1 class="test" id="id_test">test</h1>'),
+        ('<html><head/><body><div/>\n</body></html>\n',
+         '<div></div>\n'),
+        ('<html><head/><body><div/>\n</body></html>\n',
+         '<div></div>\r\n'),
+    ]
+    for a_html, b_html in html_equal_cases:
+        assert_html_equal(a_html, b_html)
 
-    def test_parse_comments(self):
-        assert_html_equal(
-            minidom_tostring(parse_minidom('<!-- -->')),
-            '',
-        )
-        assert_html_equal(
-            minidom_tostring(parse_minidom('<!--\n-->')),
-            '',
-        )
-        assert_html_equal(
-            minidom_tostring(parse_minidom('<p>stuff<!-- \n -->stuff</p>')),
-            '<p>stuffstuff</p>',
-        )
+def test_html_not_equal():
+    html_not_equal_cases = [
+        ('<h1>test</h1>',
+         '<h2>test</h2>'),
+        ('<h1>red</h1>',
+         '<h1>green</h1>'),
+        ('<h1> test</h1>',
+         '<h1>test</h1>'),
+        ('<span> </span>',
+         '<span/>'),
+        ('<h1>one</h1>',
+         '<h1>one</h1><h2>two</h2>'),
+        ('<ul><li>A</li></ul>',
+         '<ol><li>A</li></ol>'),
+    ]
+    for a_html, b_html in html_not_equal_cases:
+        assert_html_not_equal(a_html, b_html)
 
-    def test_html_equal(self):
-        html_equal_cases = [
-            ('<h1>test</h1>',
-             '<h1>test</h1>'),
-            ('<h1> test</h1>',
-             '<h1> test'),
-            ('<span />',
-             '<span/>'),
-            ('<span></span>',
-             '<span/>'),
-            ('<h1 id="id_test" class="test">test</h1>',
-             '<h1 class="test" id="id_test">test</h1>'),
-            ('<html><head/><body><div/>\n</body></html>\n',
-             '<div></div>\n'),
-            ('<html><head/><body><div/>\n</body></html>\n',
-             '<div></div>\r\n'),
-        ]
-        for a_html, b_html in html_equal_cases:
-            assert_html_equal(a_html, b_html)
+def test_remove_attributes():
+    remove_attributes_cases = [
+        ('<h1>one</h1>',
+         '<h1>one</h1>'),
+        ('<h1 class="test">one</h1>',
+         '<h1>one</h1>'),
+        ('<h1 id="test-heading" class="test">one</h1>',
+         '<h1>one</h1>'),
+        ('<div>before <h1 id="test-heading" class="test">one</h1> after </div>',
+         '<div>before <h1>one</h1> after </div>'),
+        (u'<h1 class="test">\xc3\xbcber</h1>',
+         u'<h1>\xc3\xbcber</h1>'),
+    ]
+    for html, stripped_html, in remove_attributes_cases:
+        assert_html_equal(remove_attributes(html), stripped_html)
 
-    def test_html_not_equal(self):
-        html_not_equal_cases = [
-            ('<h1>test</h1>',
-             '<h2>test</h2>'),
-            ('<h1>red</h1>',
-             '<h1>green</h1>'),
-            ('<h1> test</h1>',
-             '<h1>test</h1>'),
-            ('<span> </span>',
-             '<span/>'),
-            ('<h1>one</h1>',
-             '<h1>one</h1><h2>two</h2>'),
-            ('<ul><li>A</li></ul>',
-             '<ol><li>A</li></ol>'),
-        ]
-        for a_html, b_html in html_not_equal_cases:
-            assert_html_not_equal(a_html, b_html)
+def test_cases_sanity():
+    # check that removing the ins and del markup gives the original
+    sane_cases = (test_cases + reverse_test_cases + one_way_test_cases)
+    for name, old_html, new_html, target_changes, edit_script in sane_cases:
+        def test():
+            assert_strip_changes(old_html, new_html, target_changes)
+        test.description = 'test_cases_sanity - %s' % name
+        yield test
 
-    def test_remove_attributes(self):
-        remove_attributes_cases = [
-            ('<h1>one</h1>',
-             '<h1>one</h1>'),
-            ('<h1 class="test">one</h1>',
-             '<h1>one</h1>'),
-            ('<h1 id="test-heading" class="test">one</h1>',
-             '<h1>one</h1>'),
-            ('<div>before <h1 id="test-heading" class="test">one</h1> after </div>',
-             '<div>before <h1>one</h1> after </div>'),
-            (u'<h1 class="test">\xc3\xbcber</h1>',
-             u'<h1>\xc3\xbcber</h1>'),
-        ]
-        for html, stripped_html, in remove_attributes_cases:
-            assert_html_equal(remove_attributes(html), stripped_html)
+def test_html_diff():
+    # edit script output does not reverse easily, don't test the reverse cases
+    for name, old_html, new_html, target_changes, edit_script in (test_cases + one_way_test_cases):
+        if not edit_script:
+            continue
+        def test():
+            actual_edit_script = html_diff(old_html, new_html)
+            assert_equal(
+                edit_script,
+                actual_edit_script,
+                'These edit scripts do not match:\n%s\n!=\n%s' % (pformat(edit_script), pformat(actual_edit_script)),
+            )
+        test.description = 'test_html_diff - %s' % name
+        yield test
 
-    def test_cases_sanity(self):
-        # check that removing the ins and del markup gives the original
-        sane_cases = (test_cases + reverse_test_cases + one_way_test_cases)
-        try:
-            for old_html, new_html, target_changes, edit_script in sane_cases:
-                self.assert_strip_changes(old_html, new_html, target_changes)
-        except:
-            print
-            print 'Test case sanity failed on:'
-            print old_html
-            print new_html
-            print target_changes
-            raise
+def test_html_patch():
+    for name, old_html, new_html, target_changes, target_edit_script in all_test_cases:
+        # check that applying the diff gives back the same new_html
+        def test():
+            edit_script = []
+            edit_script = html_diff(old_html, new_html)
+            edited_html = html_patch(old_html, edit_script)
+            assert_html_equal(
+                remove_attributes(edited_html),
+                remove_attributes(new_html),
+            )
+        test.description = 'test_html_patch - %s' % name
+        yield test
 
-    def test_html_diff(self):
-        try:
-            # edit script output does not reverse easily, don't test the reverse cases
-            for old_html, new_html, target_changes, edit_script in (test_cases + one_way_test_cases):
-                if not edit_script:
-                    continue
-                actual_edit_script = html_diff(old_html, new_html)
-                self.assertEqual(
-                    edit_script,
-                    actual_edit_script,
-                    'These edit scripts do not match:\n%s\n!=\n%s' % (pformat(edit_script), pformat(actual_edit_script)),
-                )
-        except:
-            print
-            print 'Html diff failed on:'
-            print old_html
-            print new_html
-            print edit_script
-            raise
-
-    def test_html_patch(self):
-        try:
-            for old_html, new_html, target_changes, target_edit_script in all_test_cases:
-                # check that applying the diff gives back the same new_html
-                edit_script = []
-                edit_script = html_diff(old_html, new_html)
-                edited_html = html_patch(old_html, edit_script)
-                assert_html_equal(
-                    remove_attributes(edited_html),
-                    remove_attributes(new_html),
-                )
-        except:
-            print
-            print 'Html Patch failed on:'
-            print 'old:', old_html
-            print 'new:', new_html
-            print 'changes:', target_changes
-            print 'edit script:'
-            for step in edit_script:
-                print step
-            raise
-
-    def test_html_changes(self):
-        try:
-            for old_html, new_html, target_changes, edit_script in all_test_cases:
-                # check full diff function
-                changes = None
-                changes = html_changes(old_html, new_html, cutoff=0.0)
-                # test that the generated diff gives back the original
-                if (old_html, new_html, target_changes, edit_script) not in insane_test_cases:
-                    self.assert_strip_changes(old_html, new_html, changes)
-                # test that it matches the expected value
-                assert_html_equal(changes, target_changes) # if we fail here, the test case is possibly wrong
-        except:
-            print
-            print 'HtmlChanges failed on:'
-            print 'old:', old_html
-            print 'new:', new_html
-            print 'target:', target_changes
-            print 'actual:', changes
-            print 'expected edit script:'
-            for step in edit_script:
-                print step
-            print 'actual edit script:'
-            for step in html_diff(old_html, new_html):
-                print step
-            raise
+def test_html_changes():
+    for name, old_html, new_html, target_changes, edit_script in all_test_cases:
+        def test():
+            # check full diff function
+            changes = None
+            changes = html_changes(old_html, new_html, cutoff=0.0)
+            # test that the generated diff gives back the original
+            if (name, old_html, new_html, target_changes, edit_script) not in insane_test_cases:
+                assert_strip_changes(old_html, new_html, changes)
+            # test that it matches the expected value
+            assert_html_equal(changes, target_changes) # if we fail here, the test case is possibly wrong
+        test.description = 'test_html_changes - %s' % name
+        yield test

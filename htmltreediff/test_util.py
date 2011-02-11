@@ -66,7 +66,7 @@ def collapse(html):
 
 def fix_node_locations(test_cases):
     """Fix node locations in test cases."""
-    for old_html, new_html, target_changes, edit_script in copy(test_cases):
+    for name, old_html, new_html, target_changes, edit_script in copy(test_cases):
         new_edit_script = []
         for action, location, node_properties in edit_script:
             location = [1] + location # account for auto-added head and body elements
@@ -76,6 +76,7 @@ def fix_node_locations(test_cases):
                 node_properties,
             ))
         yield (
+            name,
             old_html,
             new_html,
             target_changes,
