@@ -3,7 +3,7 @@ from htmltreediff import html_changes
 
 def main(argv=None):
     if not argv:
-        argv = sys.argv
+        argv = sys.argv # pragma: no cover
     with open(argv[1]) as file_a:
         html_a = file_a.read()
     with open(argv[2]) as file_b:

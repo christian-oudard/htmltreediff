@@ -160,9 +160,9 @@ def attribute_dict(node):
 
 def normalize_entities(html):
     # turn &nbsp; and aliases into normal spaces
-    html = html.replace('&nbsp;', ' ')
-    html = html.replace('&#160;', ' ')
-    html = html.replace('&#xA0;', ' ')
+    html = html.replace(u'&nbsp;', u' ')
+    html = html.replace(u'&#160;', u' ')
+    html = html.replace(u'&#xA0;', u' ')
     html = html.replace(u'\xa0', u' ')
     return html
 

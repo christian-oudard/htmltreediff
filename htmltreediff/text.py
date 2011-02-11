@@ -90,15 +90,12 @@ _word_split_regexes = [
     re.compile(r'\d+(-\d+)+'),
     # Simplified date pattern. Any slash-separated list of digits.
     re.compile(r'\d+(/\d+)+'),
-    # Regular expression to split on words and punctuation.
-    re.compile(
-        r"""
-        [a-zA-Z]+ # a word
-        |\d+       # a number
-        |[%s]      # punctuation
-        """ % (re.escape(string.punctuation)),
-        re.VERBOSE
-    ),
+    # Numbers
+    re.compile(r'\d+'),
+    # Punctuation
+    re.compile(r'[%s]' % re.escape(string.punctuation)),
+    # Words
+    re.compile(r'\w+', re.UNICODE),
 ]
 
 def split_text(text):
@@ -173,20 +170,6 @@ class WordMatcher(SequenceMatcher):
         if self.isjunk and self.isjunk(word):
             return 0
         return len(word)
-
-
-_placeholder_regex = re.compile(r'({{{[^{].*?}}})')
-class PlaceholderMatcher(WordMatcher):
-    @staticmethod
-    def _split_text(text):
-        return multi_split(text, [_placeholder_regex] + _word_split_regexes)
-
-    def _word_length(self, word):
-        # don't count placeholders toward the string length
-        if _placeholder_regex.match(word):
-            return 0
-        return WordMatcher._word_length(self, word)
-
 
 def text_changes(old_text, new_text, cutoff=0.4, matcher_class=WordMatcher):
     """

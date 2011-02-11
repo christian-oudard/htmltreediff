@@ -1,5 +1,7 @@
+# coding: utf8
+
 from nose.tools import assert_equal
-from htmltreediff.text import text_changes, WordMatcher, PlaceholderMatcher
+from htmltreediff.text import text_changes, WordMatcher
 
 def test_text_split():
     cases = [
@@ -7,6 +9,8 @@ def test_text_split():
          ['word']),
         ('two words',
          ['two', ' ', 'words']),
+        ('abcdef12',
+         ['abcdef', '12']),
         ('entity&quot;s',
          ['entity', '&quot;', 's']),
         ("we're excited",
@@ -15,6 +19,8 @@ def test_text_split():
          ['dial', ' ', '1-800-555-1234']),
         ('Effective 1/2/2003',
          ['Effective', ' ', '1/2/2003']),
+        (u'über français',
+         [u'über', u' ', u'français']),
     ]
     for text, target in cases:
         def test():

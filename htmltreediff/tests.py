@@ -1,3 +1,5 @@
+# coding: utf8
+
 import sys
 import tempfile
 from copy import copy
@@ -32,10 +34,10 @@ from htmltreediff.test_util import (
 def test_main():
     # Run the command line interface main function.
     f1 = tempfile.NamedTemporaryFile()
-    f1.write('<h1>one</h1>')
+    f1.write(u'<h1>one</h1>')
     f1.seek(0)
     f2 = tempfile.NamedTemporaryFile()
-    f2.write('<h1>one</h1><h2>two</h2>')
+    f2.write(u'<h1>one</h1><h2>two</h2>')
     f2.seek(0)
 
     try:
@@ -57,9 +59,6 @@ def test_main():
         )
     finally:
         sys.stdout = old_stdout
-
-    # Run it with no arguments, it throws an error.
-    assert_raises(IOError, main)
 
 # since the test cases get automatically reversed, only include insert cases,
 # not delete cases
@@ -489,12 +488,11 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
     (
         'unicode text',
         u'<h1>uber ......</h1>',
-        u'<h1>\xc3\xbcber ......</h1>',
-        u'<h1><del>uber</del><ins>\xc3\xbcber</ins> ......</h1>',
+        u'<h1>über ......</h1>',
+        u'<h1><del>uber</del><ins>über</ins> ......</h1>',
         [
             ('delete', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'uber'}),
-            ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'\xc3\xbc'}),
-            ('insert', [0, 1], {'node_type': Node.TEXT_NODE, 'node_value': u'ber'}),
+            ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'über'}),
         ]
     ),
     (
@@ -864,8 +862,8 @@ def test_remove_attributes():
          '<h1>one</h1>'),
         ('<div>before <h1 id="test-heading" class="test">one</h1> after </div>',
          '<div>before <h1>one</h1> after </div>'),
-        (u'<h1 class="test">\xc3\xbcber</h1>',
-         u'<h1>\xc3\xbcber</h1>'),
+        (u'<h1 class="test">über</h1>',
+         u'<h1>über</h1>'),
     ]
     for html, stripped_html, in remove_attributes_cases:
         assert_html_equal(remove_attributes(html), stripped_html)
