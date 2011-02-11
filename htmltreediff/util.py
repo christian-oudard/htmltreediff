@@ -308,27 +308,6 @@ def insert_or_append(parent, node, next_sibling):
     else:
         parent.appendChild(node)
 
-def remove_text_section(node, start, end):
-    """
-    Remove a section of text. Return the three parts created by the split.
-    The remaining adjacent text nodes are NOT normalized. The original text
-    node is removed from the document.
-    """
-    assert node.nodeType == Node.TEXT_NODE
-    text = node.nodeValue
-    parent = node.parentNode
-    def add_text_node(node_value):
-        text_node = node.ownerDocument.createTextNode(node_value)
-        if parent:
-            parent.insertBefore(text_node, node)
-        return text_node
-    before  = add_text_node(text[:start])
-    deleted = add_text_node(text[start:end])
-    after   = add_text_node(text[end:])
-    remove_node(deleted)
-    remove_node(node)
-    return before, deleted, after
-
 def wrap(node, tag):
     """Wrap the given tag around a node."""
     wrap_node = node.ownerDocument.createElement(tag)

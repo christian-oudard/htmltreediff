@@ -10,7 +10,6 @@ from htmltreediff.util import (
     walk_dom,
     remove_node,
     insert_or_append,
-    remove_text_section,
     wrap,
     wrap_inner,
     unwrap,
