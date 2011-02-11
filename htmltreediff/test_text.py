@@ -1,7 +1,8 @@
 # coding: utf8
 
 from nose.tools import assert_equal
-from htmltreediff.text import text_changes, WordMatcher
+from htmltreediff.html import diff
+from htmltreediff.text import WordMatcher
 
 def test_text_split():
     cases = [
@@ -27,13 +28,13 @@ def test_text_split():
             assert_equal(WordMatcher()._split_text(text), target)
         yield test
 
-def test_text_changes():
+def test_text_diff():
     cases = [
         (
             'sub-word changes',
             'The quick brown fox jumps over the lazy dog.',
             'The very quick brown foxes jump over the dog.',
-            'The<ins> very</ins> quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.',
+            'The <ins>very </ins>quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.',
         ),
         (
             'contractions',
@@ -74,6 +75,6 @@ def test_text_changes():
     ]
     for description, old, new, changes in cases:
         def test():
-            assert_equal(text_changes(old, new, cutoff=0.0), changes)
-        test.description = 'test_text_changes - %s' % description
+            assert_equal(diff(old, new, html=False), changes)
+        test.description = 'test_text_diff - %s' % description
         yield test

@@ -1,6 +1,6 @@
 from copy import copy
 
-from htmltreediff.diff import Differ
+from htmltreediff.diff_core import Differ
 from htmltreediff.edit_script_runner import EditScriptRunner
 from htmltreediff.changes import (
     split_text_nodes,

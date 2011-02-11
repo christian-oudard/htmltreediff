@@ -14,7 +14,7 @@ from htmltreediff.util import (
     wrap_inner,
     unwrap,
 )
-from htmltreediff.diff import Differ
+from htmltreediff.diff_core import Differ
 from htmltreediff.edit_script_runner import EditScriptRunner
 
 def split_text_nodes(dom):
@@ -34,7 +34,7 @@ def split_node(node):
         parent.insertBefore(piece_node, node)
     remove_node(node)
 
-def dom_changes(old_dom, new_dom):
+def dom_diff(old_dom, new_dom):
     # Split all the text nodes in the old and new dom.
     split_text_nodes(old_dom)
     split_text_nodes(new_dom)

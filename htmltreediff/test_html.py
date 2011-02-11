@@ -2,7 +2,7 @@ from textwrap import dedent
 
 from nose.tools import assert_equal
 
-from htmltreediff import html_changes
+from htmltreediff.html import diff
 from htmltreediff.tests import assert_html_equal
 from htmltreediff.changes import distribute
 from htmltreediff.html import fix_lists, fix_tables
@@ -94,7 +94,7 @@ def test_remove_insignificant_text_nodes_nbsp():
 ## Post-processing
 
 def test_cutoff():
-    changes = html_changes(
+    changes = diff(
         '<h1>totally</h1>',
         '<h2>different</h2>',
         cutoff=0.2,
@@ -105,7 +105,7 @@ def test_cutoff():
         'concisely.</h2>',
     )
 
-def test_html_changes_pretty():
+def test_html_diff_pretty():
     cases = [
         (
             'Simple Addition',
@@ -125,9 +125,9 @@ def test_html_changes_pretty():
     ]
     for test_name, old_html, new_html, pretty_changes in cases:
         def test():
-            changes = html_changes(old_html, new_html, cutoff=0.0, pretty=True)
+            changes = diff(old_html, new_html, cutoff=0.0, pretty=True)
             assert_equal(pretty_changes, changes)
-        test.description = 'test_html_changes_pretty - %s' % test_name
+        test.description = 'test_html_diff_pretty - %s' % test_name
         yield test
 
 def test_distribute():

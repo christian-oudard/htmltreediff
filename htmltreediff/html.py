@@ -6,9 +6,9 @@ from htmltreediff.util import (
     remove_node,
     tree_text_ratio,
 )
-from htmltreediff.changes import dom_changes, distribute
+from htmltreediff.changes import dom_diff, distribute
 
-def html_changes(old_html, new_html, cutoff=0.0, html=True, pretty=False):
+def diff(old_html, new_html, cutoff=0.0, html=True, pretty=False):
     """Show the differences between the old and new html document, as html.
 
     Return the document html with extra tags added to show changes. Add <ins>
@@ -23,7 +23,7 @@ def html_changes(old_html, new_html, cutoff=0.0, html=True, pretty=False):
     if ratio < cutoff:
         return '<h2>The differences from the previous version are too large to show concisely.</h2>'
 
-    dom = dom_changes(old_dom, new_dom)
+    dom = dom_diff(old_dom, new_dom)
 
     # HTML-specific cleanup.
     if html:

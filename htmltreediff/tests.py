@@ -11,7 +11,7 @@ from xml.dom import Node
 from nose.tools import assert_equal, assert_raises
 from unittest import TestCase
 
-from htmltreediff import html_changes
+from htmltreediff.html import diff
 from htmltreediff.cli import main
 from htmltreediff.util import (
     parse_minidom,
@@ -907,10 +907,10 @@ def test_cases_sanity():
         test.description = 'test_cases_sanity - %s' % case.name
         yield test
 
-def test_html_changes():
+def test_html_diff():
     for case in parse_cases(all_test_cases):
         def test():
-            changes = html_changes(case.old_html, case.new_html, cutoff=0.0)
+            changes = diff(case.old_html, case.new_html, cutoff=0.0)
             assert_html_equal(changes, case.target_changes)
-        test.description = 'test_html_changes - %s' % case.name
+        test.description = 'test_html_diff - %s' % case.name
         yield test
