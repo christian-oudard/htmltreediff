@@ -30,8 +30,7 @@ def test_illegal_text_nodes():
     html = minidom_tostring(dom)
     assert_equal(
         html,
-        '<html><head/><body> illegal text '
-        '<table><tbody><tr><td>stuff</td></tr></tbody></table></body></html>',
+        'illegal text <table><tbody><tr><td>stuff</td></tr></tbody></table>',
     )
 
 def test_remove_insignificant_text_nodes():
@@ -55,8 +54,8 @@ def test_remove_insignificant_text_nodes():
     html = minidom_tostring(dom)
     assert_equal(
         html,
-        '<html><head/><body> <p> one <em>two</em> <strong>three</strong> </p> '
-        '<table><tbody><tr><td>stuff</td></tr></tbody></table> </body></html>',
+        ('<p> one <em>two</em> <strong>three</strong> </p> '
+         '<table><tbody><tr><td>stuff</td></tr></tbody></table>'),
     )
 
     # Check that it is idempotent.
@@ -65,8 +64,8 @@ def test_remove_insignificant_text_nodes():
     html = minidom_tostring(dom)
     assert_equal(
         html,
-        ('<html><head/><body> <p> one <em>two</em> <strong>three</strong> </p> '
-         '<table><tbody><tr><td>stuff</td></tr></tbody></table> </body></html>'),
+        ('<p> one <em>two</em> <strong>three</strong> </p> '
+         '<table><tbody><tr><td>stuff</td></tr></tbody></table>'),
     )
 
 def test_remove_insignificant_text_nodes_nbsp():
@@ -86,8 +85,8 @@ def test_remove_insignificant_text_nodes_nbsp():
     html = minidom_tostring(dom)
     assert_equal(
         html,
-        ('<html><head/><body><table><tbody><tr><td> </td><td> </td><td> </td>'
-         '</tr></tbody></table></body></html>'),
+        ('<table><tbody><tr><td> </td><td> </td><td> </td>'
+         '</tr></tbody></table>'),
     )
 
 
@@ -139,7 +138,7 @@ def test_distribute():
         def test(original, distributed):
             original = parse_minidom(original)
             distributed = parse_minidom(distributed)
-            node = get_location(original, [1, 0])
+            node = get_location(original, [0])
             distribute(node)
             assert_html_equal(
                 minidom_tostring(original),

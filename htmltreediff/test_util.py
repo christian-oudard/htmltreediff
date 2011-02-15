@@ -85,30 +85,3 @@ def parse_cases(cases):
         else:
             case.name, case.old_html, case.new_html, case.target_changes, case.edit_script = args
         yield case
-
-def fix_node_locations(test_cases):
-    """Fix node locations in test cases."""
-    for case in parse_cases(test_cases):
-        if case.edit_script is None:
-            yield (
-                case.name,
-                case.old_html,
-                case.new_html,
-                case.target_changes,
-            )
-            continue
-        new_edit_script = []
-        for action, location, node_properties in case.edit_script:
-            location = [1] + location # account for auto-added head and body elements
-            new_edit_script.append((
-                action,
-                location,
-                node_properties,
-            ))
-        yield (
-            case.name,
-            case.old_html,
-            case.new_html,
-            case.target_changes,
-            new_edit_script,
-        )

@@ -27,7 +27,6 @@ from htmltreediff.test_util import (
     strip_changes_new,
     remove_attributes,
     collapse,
-    fix_node_locations,
     parse_cases,
 )
 
@@ -40,8 +39,8 @@ def test_main():
     f2.write(u'<h1>one</h1><h2>two</h2>')
     f2.seek(0)
 
+    old_stdout = sys.stdout
     try:
-        old_stdout = sys.stdout
         sys.stdout = stream = StringIO()
         main(argv=('', f1.name, f2.name))
         assert_equal(
@@ -775,12 +774,6 @@ def reverse_cases(cases):
             reverse_edit_script(case.edit_script),
         )
 reverse_test_cases = list(reverse_cases(test_cases))
-
-# Fix node locations
-test_cases = list(fix_node_locations(test_cases))
-reverse_test_cases = list(fix_node_locations(reverse_test_cases))
-one_way_test_cases = list(fix_node_locations(one_way_test_cases))
-insane_test_cases = list(fix_node_locations(insane_test_cases))
 
 # Combined cases
 all_test_cases = (test_cases +

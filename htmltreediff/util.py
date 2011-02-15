@@ -21,6 +21,7 @@ def parse_minidom(xml, clean=True, html=True):
         if clean:
             remove_insignificant_text_nodes(dom)
     else:
+        xml = '<body>' + xml + '</body>'
         dom = minidom.parseString(xml)
 
     if clean:
@@ -35,6 +36,14 @@ def parse_minidom(xml, clean=True, html=True):
             elif node.nodeName == 'span':
                 unwrap(node)
     dom.normalize()
+
+    # Make sure that the body element is the top of the dom.
+    for head_element in dom.getElementsByTagName('head'):
+        remove_node(head_element)
+    for html_element in dom.getElementsByTagName('html'):
+        unwrap(html_element)
+
+    assert dom.documentElement.tagName == 'body'
     return dom
 
 def remove_comments(xml):

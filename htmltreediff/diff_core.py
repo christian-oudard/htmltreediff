@@ -39,7 +39,7 @@ class Differ():
         Any properties that would be empty may be ommitted. attributes is an attribute dictionary.
         """
         # start diff at the body element
-        self.diff_location([1], [1])
+        self.diff_location([], [])
         return self.edit_script
 
     def diff_location(self, old_location, new_location):
