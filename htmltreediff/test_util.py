@@ -1,5 +1,3 @@
-from copy import copy
-
 from htmltreediff.diff_core import Differ
 from htmltreediff.edit_script_runner import EditScriptRunner
 from htmltreediff.changes import (

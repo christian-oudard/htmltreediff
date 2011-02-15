@@ -1,7 +1,3 @@
-import re, cgi
-from collections import defaultdict
-from xml.dom import minidom
-
 from htmltreediff.text import split_text
 from htmltreediff.util import (
     is_text,

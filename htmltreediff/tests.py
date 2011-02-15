@@ -2,14 +2,12 @@
 
 import sys
 import tempfile
-from copy import copy
 from pprint import pformat
 from textwrap import dedent
 from StringIO import StringIO
 from xml.dom import Node
 
-from nose.tools import assert_equal, assert_raises
-from unittest import TestCase
+from nose.tools import assert_equal
 
 from htmltreediff.html import diff
 from htmltreediff.cli import main

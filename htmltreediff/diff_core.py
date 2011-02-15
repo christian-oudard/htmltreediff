@@ -1,11 +1,8 @@
 import difflib
 from xml.dom import Node
 
-from htmltreediff.text import WordMatcher
 from htmltreediff.util import (
     copy_dom,
-    HashableNode,
-    HashableTree,
     FuzzyHashableTree,
     is_text,
     get_child,
@@ -14,7 +11,6 @@ from htmltreediff.util import (
     insert_or_append,
     attribute_dict,
     walk_dom,
-    tree_text,
 )
 
 class Differ():

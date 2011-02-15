@@ -269,22 +269,6 @@ def tree_text_ratio(a_dom, b_dom):
     matcher = _text_matcher(a_dom, b_dom)
     return matcher.text_ratio()
 
-def tree_similarity(a_dom, b_dom, cutoff=0.6):
-    """Compare two dom trees for text similarity, as the total length of matching words."""
-    # Nodes that have a different type or tag name are not equal.
-    if not (a_dom.nodeType == b_dom.nodeType == Node.ELEMENT_NODE):
-        return 0
-    if a_dom.tagName != b_dom.tagName:
-        return 0
-
-    matcher = _text_matcher(a_dom, b_dom)
-
-    # If the ratio is above the cutoff, the length of the matching text is the
-    # quality of the match.
-    if matcher.text_ratio() < cutoff:
-        return 0
-    return matcher.match_length()
-
 def _text_matcher(a_dom, b_dom):
     return WordMatcher(
         a=tree_text(a_dom),
