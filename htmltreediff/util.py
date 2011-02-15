@@ -51,8 +51,16 @@ def remove_comments(xml):
     Remove comments, as they can break the xml parser.
 
     See html5lib issue #122 ( http://code.google.com/p/html5lib/issues/detail?id=122 ).
+
+    >>> remove_comments('<!-- -->')
+    ''
+    >>> remove_comments('<!--\\n-->')
+    ''
+    >>> remove_comments('<p>stuff<!-- \\n -->stuff</p>')
+    '<p>stuffstuff</p>'
     """
-    return re.sub(r'<!--.*?-->', '', xml)
+    regex = re.compile(r'<!--.*?-->', re.DOTALL)
+    return regex.sub('', xml)
 
 def remove_newlines(xml):
     r"""Remove newlines in the xml.
