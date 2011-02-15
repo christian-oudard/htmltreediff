@@ -1,5 +1,6 @@
 # coding: utf8
 
+from textwrap import dedent
 from nose.tools import assert_equal
 from htmltreediff.html import diff
 from htmltreediff.text import WordMatcher
@@ -48,27 +49,28 @@ def test_text_diff():
             'Effective 3/4/2005',
             'Effective <del>1/2/2003</del><ins>3/4/2005</ins>',
         ),
-# This text diff sucks.
-#            ('''
-#Release Announcement: Protected Policies and Bulk Override
-#Last night we successfully updated PolicyStat with a shiny new version. Some of the high notes in this release include:
+#        (
+#            'long text diff',
+#            dedent('''
+#                Release Announcement: Protected Policies and Bulk Override
+#                Last night we successfully updated with a shiny new version. Some of the high notes in this release include:
 #
-#Managers can now restrict the visibility of certain policies that only certain users can view policies. I'll be writing up a bit more about this feature a little later, but the gist is that you can now do things like restricting certain sensitive HR policies from being viewable by general staff members. Another nice usage would be for partitioning off one segment of policies, say your Lab policies, so that only users from the lab saw them, which can reduce search clutter for the majority of your staff that doesn't care about that set of policies.
-#Site administrators now have access to Bulk Admin Override, which makes performing sweeping changes a painless endeavor.
-#We optimized the auto-save functionality to allow for better editor performance on long, complicated documents.
+#                Managers can now restrict the visibility of certain policies that only certain users can view policies. I'll be writing up a bit more about this feature a little later, but the gist is that you can now do things like restricting certain sensitive HR policies from being viewable by general staff members. Another nice usage would be for partitioning off one segment of policies, say your Lab policies, so that only users from the lab saw them, which can reduce search clutter for the majority of your staff that doesn't care about that set of policies.
+#                Site administrators now have access to Bulk Admin Override, which makes performing sweeping changes a painless endeavor.
+#                We optimized the auto-save functionality to allow for better editor performance on long, complicated documents.
 #
-# All three of these features were prioritized based on direct customer feedback and I'm excited we were able to make it happen. Once again, I think our customers were right on the money on where we could add some very useful functionality. Thanks for the feedback and as always, if you have any other questions/concerns/comments or if you are just wondering how the weather is in Indianapolis, drop us a line.
-#             ''',
-#             '''
-#Release Announcement: Protected Policies and Bulk Override
-#Last night we successfully updated PolicyStat with a shiny new version. Some of the high notes in this release include:
+#                 All three of these features were prioritized based on direct customer feedback and I'm excited we were able to make it happen. Once again, I think our customers were right on the money on where we could add some very useful functionality. Thanks for the feedback and as always, if you have any other questions/concerns/comments or if you are just wondering how the weather is in Indianapolis, drop us a line.
+#             '''),
+#             dedent('''
+#                Release Announcement: Protected Policies and Bulk Override
+#                Last night we successfully updated with a shiny new version. Some of the high notes in this release include:
 #
-#Managers can now restrict the visibility of policies so that only certain users can view them. I'll be writing more about this feature a little later, but the gist is that you can now do things like restrict sensitive HR policies from being viewable by general staff members. Another nice usage would be to partition off one segment of policies, say your Lab policies, so that only users from the lab see them. This reduces search clutter for the rest of your staff members, who don't care about the lab policies.
-#Site administrators now have access to Bulk Admin Override, which makes performing sweeping changes a painless endeavor.
-#We optimized the auto-save functionality to eliminate occasional pauses when your changes get saved. These pauses were too long when working on large documents.
+#                Managers can now restrict the visibility of policies so that only certain users can view them. I'll be writing more about this feature a little later, but the gist is that you can now do things like restrict sensitive HR policies from being viewable by general staff members. Another nice usage would be to partition off one segment of policies, say your Lab policies, so that only users from the lab see them. This reduces search clutter for the rest of your staff members, who don't care about the lab policies.
+#                Site administrators now have access to Bulk Admin Override, which makes performing sweeping changes a painless endeavor.
+#                We optimized the auto-save functionality to eliminate occasional pauses when your changes get saved. These pauses were too long when working on large documents.
 #
-# All three of these features were prioritized based on direct customer feedback, and we're excited to be able to make them happen. Once again, I think our customers were right on the money with their suggestions on where things could be improved. Thanks for the feedback as always. If you have any questions/concerns/comments, or if you are just wondering how the weather is in Indianapolis, drop us a line.
-#             ''',
+#                 All three of these features were prioritized based on direct customer feedback, and we're excited to be able to make them happen. Once again, I think our customers were right on the money with their suggestions on where things could be improved. Thanks for the feedback as always. If you have any questions/concerns/comments, or if you are just wondering how the weather is in Indianapolis, drop us a line.
+#             '''),
 #             '''
 #             ''',
 #            ),
