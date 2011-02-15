@@ -1,16 +1,11 @@
 # coding: utf8
 
-import sys
-import tempfile
 from pprint import pformat
-from textwrap import dedent
-from StringIO import StringIO
 from xml.dom import Node
 
 from nose.tools import assert_equal
 
 from htmltreediff.html import diff
-from htmltreediff.cli import main
 from htmltreediff.util import (
     parse_minidom,
     minidom_tostring,
@@ -27,35 +22,6 @@ from htmltreediff.test_util import (
     collapse,
     parse_cases,
 )
-
-def test_main():
-    # Run the command line interface main function.
-    f1 = tempfile.NamedTemporaryFile()
-    f1.write(u'<h1>one</h1>')
-    f1.seek(0)
-    f2 = tempfile.NamedTemporaryFile()
-    f2.write(u'<h1>one</h1><h2>two</h2>')
-    f2.seek(0)
-
-    old_stdout = sys.stdout
-    try:
-        sys.stdout = stream = StringIO()
-        main(argv=('', f1.name, f2.name))
-        assert_equal(
-            stream.getvalue(),
-            dedent('''
-                <h1>
-                  one
-                </h1>
-                <ins>
-                  <h2>
-                    two
-                  </h2>
-                </ins>
-            ''').strip() + '\n',
-        )
-    finally:
-        sys.stdout = old_stdout
 
 # since the test cases get automatically reversed, only include insert cases,
 # not delete cases
@@ -121,12 +87,12 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
     ),
     (
         'simple insert with tail text',
-        'tail',
-        '<h1>one</h1>tail',
-        '<ins><h1>one</h1></ins>tail',
+        '<div>tail</div>',
+        '<div><h1>one</h1>tail</div>',
+        '<div><ins><h1>one</h1></ins>tail</div>',
         [
-            ('insert', [0], {'node_type': Node.ELEMENT_NODE, 'node_name': u'h1'}),
-            ('insert', [0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'one'}),
+            ('insert', [0, 0], {'node_type': Node.ELEMENT_NODE, 'node_name': u'h1'}),
+            ('insert', [0, 0, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'one'}),
         ]
     ),
     (
@@ -215,18 +181,18 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
     ),
     (
         'multiple node replace with extra text',
-        'before<h1>one</h1><h2>two</h2>after',
-        'before<h3>three</h3><h4>four</h4>after',
-        'before<del><h1>one</h1><h2>two</h2></del><ins><h3>three</h3><h4>four</h4></ins>after',
+        '<div>before<h1>one</h1><h2>two</h2>after</div>',
+        '<div>before<h3>three</h3><h4>four</h4>after</div>',
+        '<div>before<del><h1>one</h1><h2>two</h2></del><ins><h3>three</h3><h4>four</h4></ins>after</div>',
         [
-            ('delete', [2, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'two'}),
-            ('delete', [2], {'node_type': Node.ELEMENT_NODE, 'node_name': u'h2'}),
-            ('delete', [1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'one'}),
-            ('delete', [1], {'node_type': Node.ELEMENT_NODE, 'node_name': u'h1'}),
-            ('insert', [1], {'node_type': Node.ELEMENT_NODE, 'node_name': u'h3'}),
-            ('insert', [1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'three'}),
-            ('insert', [2], {'node_type': Node.ELEMENT_NODE, 'node_name': u'h4'}),
-            ('insert', [2, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'four'}),
+            ('delete', [0, 2, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'two'}),
+            ('delete', [0, 2], {'node_type': Node.ELEMENT_NODE, 'node_name': u'h2'}),
+            ('delete', [0, 1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'one'}),
+            ('delete', [0, 1], {'node_type': Node.ELEMENT_NODE, 'node_name': u'h1'}),
+            ('insert', [0, 1], {'node_type': Node.ELEMENT_NODE, 'node_name': u'h3'}),
+            ('insert', [0, 1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'three'}),
+            ('insert', [0, 2], {'node_type': Node.ELEMENT_NODE, 'node_name': u'h4'}),
+            ('insert', [0, 2, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'four'}),
         ]
     ),
     (
@@ -465,24 +431,6 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
         '<div><del>x</del><ins>&nbsp;<b>x</b></ins></div>',
     ),
     (
-        'text diff with <',
-        'x',
-        '&lt;',
-        '<del>x</del><ins>&lt;</ins>',
-    ),
-    (
-        'text diff with >',
-        'x',
-        '&gt;',
-        '<del>x</del><ins>&gt;</ins>',
-    ),
-    (
-        'text diff with &',
-        'x',
-        '&amp;',
-        '<del>x</del><ins>&amp;</ins>',
-    ),
-    (
         'unicode text',
         u'<h1>uber ......</h1>',
         u'<h1>über ......</h1>',
@@ -505,12 +453,6 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
         '<del><h1>xxx</h1></del><ins><h2>xxx</h2></ins><h1>YYY</h1><h1>YYY</h1><del><h2>xxx</h2></del><ins><h1>xxx</h1></ins>',
     ),
     (
-        'text normalization',
-        'first <h1>middle</h1> last',
-        'first last',
-        'first <del><h1>middle</h1> </del>last',
-    ),
-    (
         'index in lower levels being affected by changes in upper levels',
         '<p><em>zzz</em> ...</p>',
         '<h1>xxx</h1><p>yyy ...</p>',
@@ -522,24 +464,6 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
             ('delete', [1, 0], {'node_type': Node.ELEMENT_NODE, 'node_name': u'em'}),
             ('insert', [1, 0], {'node_type': Node.TEXT_NODE, 'node_value': u'yyy'}),
         ]
-    ),
-    (
-        'ignore comments',
-        '',
-        '<div/><!--comment one--><!--comment two-->',
-        '<ins><div/></ins>',
-    ),
-    (
-        'ignore style tags',
-        '',
-        '<style type="text/css"></style>',
-        '',
-    ),
-    (
-        'style tag in a block of text',
-        '',
-        '<p>xxx<style type="text/css"></style>yyy</p>',
-        '<ins><p>xxxyyy</p></ins>',
     ),
     (
         'near match should override tag-only match',
@@ -650,8 +574,8 @@ insane_test_cases = [
         'delete top row and add a column, funny whitespace',
         '<table> <tr><td>A1</td></tr> <tr><td>... B1</td></tr> </table>',
         '<table> <tr><td>... B1</td><td>B2</td></tr> </table>',
-        ('<table><tbody><tr><td><del>A1</del></td></tr><tr><td>... B1</td>'
-         '<td><ins>B2</ins></td></tr></tbody></table>'),
+        ('<table><tr><td><del>A1</del></td></tr><tr><td>... B1</td>'
+         '<td><ins>B2</ins></td></tr></table>'),
     ),
     (
         'handle newline-separated words correctly',

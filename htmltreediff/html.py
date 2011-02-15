@@ -15,8 +15,8 @@ def diff(old_html, new_html, cutoff=0.0, html=True, pretty=False):
     tags around newly added sections, and <del> tags to show sections that have
     been deleted.
     """
-    old_dom = parse_minidom(old_html)
-    new_dom = parse_minidom(new_html)
+    old_dom = parse_minidom(old_html, html=html)
+    new_dom = parse_minidom(new_html, html=html)
 
     # If the two documents are not similar enough, don't show the changes.
     ratio = tree_text_ratio(old_dom, new_dom)

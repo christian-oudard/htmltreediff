@@ -49,6 +49,30 @@ def test_text_diff():
             'Effective 3/4/2005',
             'Effective <del>1/2/2003</del><ins>3/4/2005</ins>',
         ),
+        (
+            'text diff with <',
+            'x',
+            '&lt;',
+            '<del>x</del><ins>&lt;</ins>',
+        ),
+        (
+            'text diff with >',
+            'x',
+            '&gt;',
+            '<del>x</del><ins>&gt;</ins>',
+        ),
+        (
+            'text diff with &',
+            'x',
+            '&amp;',
+            '<del>x</del><ins>&amp;</ins>',
+        ),
+        (
+            'text normalization',
+            'first <h1>middle</h1> last',
+            'first last',
+            'first <del><h1>middle</h1> </del>last',
+        ),
 #        (
 #            'long text diff',
 #            dedent('''

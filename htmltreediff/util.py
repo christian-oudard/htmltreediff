@@ -8,6 +8,22 @@ from htmltreediff.text import WordMatcher
 
 ## DOM utilities ##
 # parsing and cleaning #
+from xml.dom.pulldom import SAX2DOM
+import lxml.html, lxml.etree, lxml.sax
+def parse_lxml_dom(xml, html=True):
+    if html:
+        parse_func = lxml.html.document_fromstring
+    else:
+        parse_func = lxml.etree.fromstring
+    try:
+        tree = parse_func(xml)
+    except lxml.etree.XMLSyntaxError:
+        tree = parse_func('<body>%s</body>' % xml)
+
+    handler = SAX2DOM()
+    lxml.sax.saxify(tree, handler)
+    return handler.document
+
 def parse_minidom(xml, clean=True, html=True):
     html_parser = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder('dom'))
     # Preprocessing
@@ -15,16 +31,14 @@ def parse_minidom(xml, clean=True, html=True):
     if clean:
         xml = remove_newlines(xml)
         xml = normalize_entities(xml)
+    xml = xml.strip()
+
     # Parse
-    if html:
-        dom = html_parser.parse(xml)
-        if clean:
-            remove_insignificant_text_nodes(dom)
-    else:
-        xml = '<body>' + xml + '</body>'
-        dom = minidom.parseString(xml)
+    dom = parse_lxml_dom(xml, html=html)
 
     if clean:
+        if html:
+            remove_insignificant_text_nodes(dom)
         # clean up irrelevant content
         for node in list(walk_dom(dom)):
             if node.nodeType == Node.COMMENT_NODE:
@@ -42,8 +56,12 @@ def parse_minidom(xml, clean=True, html=True):
         remove_node(head_element)
     for html_element in dom.getElementsByTagName('html'):
         unwrap(html_element)
+    if not dom.documentElement:
+        dom = parse_lxml_dom('', html=False)
 
-    assert dom.documentElement.tagName == 'body'
+    if html:
+        assert dom.documentElement.tagName == 'body'
+
     return dom
 
 def remove_comments(xml):
@@ -90,6 +108,8 @@ def minidom_tostring(dom, pretty=False):
     else:
         xml = dom.toxml()
     xml = remove_xml_declaration(xml)
+    if xml == '<body/>':
+        return ''
     if xml.startswith('<body>') and xml.endswith('</body>'):
         xml = xml[len('<body>'):-len('</body>')]
     xml = dedent(xml.replace('\t', '  ')).strip()
@@ -247,18 +267,20 @@ def ancestors(node):
         yield ancestor
         ancestor = ancestor.parentNode
 
-def walk_dom(dom_or_node, elements_only=False):
+def walk_dom(dom, elements_only=False):
+    # allow calling this on a document as well as as node
+    if hasattr(dom, 'documentElement'):
+        dom = dom.documentElement
     def walk(node):
+        if not node:
+            return
         if elements_only and not is_element(node):
             return
         yield node
         for child in node.childNodes:
             for descendant in walk(child):
                 yield descendant
-    # allow calling this on a document as well as as node
-    if hasattr(dom_or_node, 'documentElement'):
-        return walk(dom_or_node.documentElement)
-    return walk(dom_or_node)
+    return walk(dom)
 
 def tree_text(node):
     """Return all the text below the given node as a single string.
