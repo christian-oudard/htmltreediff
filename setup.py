@@ -14,7 +14,7 @@ long_description = codecs.open("README.rst", "r", "utf-8").read()
 
 setup(
     name="html-tree-diff",
-    version="0.1.1",
+    version="0.1.2",
     description="Structure-aware diff for html and xml documents",
     author="Christian Oudard",
     author_email="christian.oudard@gmail.com",
@@ -24,7 +24,7 @@ setup(
     packages=find_packages(),
     scripts=[],
     zip_safe=False,
-    install_requires=['html5lib'],
+    install_requires=['lxml'],
     cmdclass={},
     classifiers=[
         "Development Status :: 3 - Alpha",
