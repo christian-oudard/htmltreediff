@@ -508,6 +508,12 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
         '<img src="new.gif">',
         '<del><img src="old.gif"></del><ins><img src="new.gif"></ins>',
     ),
+    (
+        'test delete action index ordering',
+        '<p><em>xxx</em></p>',
+        '<p>zzz<em>xxx yyy</em></p>',
+        '<p><ins>zzz</ins><em>xxx<ins> yyy</ins></em></p>',
+    ),
 ]
 
 # test cases that should not be run in reverse
