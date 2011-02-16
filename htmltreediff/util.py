@@ -160,25 +160,20 @@ class FuzzyHashableTree(object):
 
     def __init__(self, node):
         self.node = node
-        self.fuzzy_match = False
 
     def __eq__(self, other):
         if HashableNode(self.node) != HashableNode(other.node):
-            self.fuzzy_match = False
             return False
 
         # Check for an exact tree match.
         if HashableTree(self.node) == HashableTree(other.node):
-            self.fuzzy_match = False
             return True
 
         # Check for a fuzzy match.
         ratio = tree_text_ratio(self.node, other.node)
         if ratio >= self.cutoff:
-            self.fuzzy_match = True
             return True
 
-        self.fuzzy_match = False
         return False
 
     def __hash__(self):

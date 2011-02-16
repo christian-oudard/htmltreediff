@@ -3,6 +3,7 @@ from xml.dom import Node
 
 from htmltreediff.util import (
     copy_dom,
+    HashableTree,
     FuzzyHashableTree,
     is_text,
     get_child,
@@ -50,25 +51,42 @@ class Differ():
         old_children = list(get_location(self.old_dom, old_location).childNodes)
         new_children = list(get_location(self.new_dom, new_location).childNodes)
 
-        # All the blocks that are matching in some way. Initialized with a sentinel.
-
         # Find whole-tree matches and fuzzy matches.
-        sm = match_blocks(FuzzyHashableTree, old_children, new_children)
-
+        sm = match_blocks(HashableTree, old_children, new_children)
         # If the match is very poor, pretend there were no exact matching blocks at all.
         if sm.ratio() < 0.3:
             matching_blocks = [(len(old_children), len(new_children), 0)]
         else:
             matching_blocks = sm.get_matching_blocks()
 
+        # In each gap between exact matches, find fuzzy matches.
+        gaps = get_nonmatching_blocks(matching_blocks)
+
+        fuzzy_matching_blocks = []
+        for nonmatch in gaps:
+            alo, ahi, blo, bhi = nonmatch
+            sm_fuzzy = match_blocks(
+                FuzzyHashableTree,
+                old_children[alo:ahi],
+                new_children[blo:bhi],
+            )
+            blocks = sm_fuzzy.get_matching_blocks()
+            # Move blocks over to the position of the gap.
+            blocks = [
+                (alo + a, blo + b, size)
+                for a, b, size in blocks
+            ]
+            fuzzy_matching_blocks.extend(blocks)
+
         # We will recurse on each tree that was a fuzzy match at this level.
         recursion_indices = [] # List of tuples, (old_index, new_index)
-        for match in matching_blocks:
+        for match in fuzzy_matching_blocks:
             for old_index, new_index in match_indices(match):
-                old_node = sm.a[old_index]
-                new_node = sm.b[new_index]
-                if new_node.fuzzy_match or old_node.fuzzy_match:
-                    recursion_indices.append((old_index, new_index))
+                recursion_indices.append((old_index, new_index))
+
+        # Zip together the fuzzy and exact matches. They are treated the same
+        # from this point forward, except for we recurse on fuzzy matches.
+        matching_blocks = merge_blocks(matching_blocks, fuzzy_matching_blocks)
 
         # Apply changes for this level.
         for tag, i1, i2, j1, j2 in adjusted_ops(get_opcodes(matching_blocks)):
@@ -211,6 +229,38 @@ def match_blocks(hash_func, old_children, new_children):
         [hash_func(c) for c in new_children],
     )
     return sm
+
+def get_nonmatching_blocks(matching_blocks):
+    """Given a list of matching blocks, output the gaps between them.
+
+    Non-matches have the format (alo, ahi, blo, bhi). This specifies two index
+    ranges, one in the A sequence, and one in the B sequence.
+    """
+    i = j = 0
+    for match in matching_blocks:
+        a, b, size = match
+        yield (i, a, j, b)
+        i = a + size
+        j = b + size
+
+def merge_blocks(a_blocks, b_blocks):
+    """Given two lists of blocks, combine them, in the proper order.
+
+    Ensure that there are no overlaps, and that they are for sequences of the
+    same length.
+    """
+    # Check sentinels for sequence length.
+    assert a_blocks[-1][2] == b_blocks[-1][2] == 0 # sentinel size is 0
+    assert a_blocks[-1] == b_blocks[-1]
+    combined_blocks = sorted(list(set(a_blocks + b_blocks)))
+    # Check for overlaps.
+    i = j = 0
+    for a, b, size in combined_blocks:
+        assert i <= a
+        assert j <= b
+        i = a + size
+        j = b + size
+    return combined_blocks
 
 def adjust_indices(indices, i1, i2, j1, j2):
     shift = (j2 - j1) - (i2 - i1)

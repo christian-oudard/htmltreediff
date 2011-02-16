@@ -31,8 +31,11 @@ def diff(old_html, new_html, cutoff=0.0, html=True, pretty=False):
         fix_tables(dom)
 
     # Only return html for the document body contents.
-    body = dom.getElementsByTagName('body')[0]
-    return minidom_tostring(body, pretty=pretty)
+    body_elements = dom.getElementsByTagName('body')
+    if len(body_elements) == 1:
+        dom = body_elements[0]
+
+    return minidom_tostring(dom, pretty=pretty)
 
 def fix_lists(dom):
     # <ins> and <del> tags are not allowed within <ul> or <ol> tags.
