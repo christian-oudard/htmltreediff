@@ -350,13 +350,13 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
         'complex text change',
         '<h1>The quick brown fox jumps over the lazy dog</h1>',
         '<h1>The very quick red fox jumps over the dog again</h1>',
-        '<h1>The <ins>very </ins>quick <del>brown</del><ins>red</ins> fox jumps over the <del>lazy </del>dog<ins> again</ins></h1>',
+        '<h1>The<ins> very</ins> quick <del>brown</del><ins>red</ins> fox jumps over the <del>lazy </del>dog<ins> again</ins></h1>',
     ),
     (
         'sub-word-boundary text change',
         '<h1>The quick brown fox jumps over the lazy dog</h1>',
         '<h1>The very quick brown foxes jump over the dog</h1>',
-        '<h1>The <ins>very </ins>quick brown <del>fox jumps</del><ins>foxes jump</ins> over the <del>lazy </del>dog</h1>',
+        '<h1>The<ins> very</ins> quick brown <del>fox jumps</del><ins>foxes jump</ins> over the <del>lazy </del>dog</h1>',
     ),
     (
         'insert markup with text before a text section',
@@ -398,7 +398,7 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
         'change markup and make complex text changes together',
         '<h1>The quick brown fox jumps over the lazy dog</h1>',
         '<h1>The very quick <b>brown</b> foxes jump over the dog</h1>',
-        '<h1>The <ins>very </ins>quick <del>brown fox jumps</del><ins><b>brown</b> foxes jump</ins> over the <del>lazy </del>dog</h1>',
+        '<h1>The<ins> very</ins> quick <del>brown fox jumps</del><ins><b>brown</b> foxes jump</ins> over the <del>lazy </del>dog</h1>',
     ),
     (
         'change markup and text together',
@@ -514,6 +514,12 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
         '<p>zzz<em>xxx yyy</em></p>',
         '<p><ins>zzz</ins><em>xxx<ins> yyy</ins></em></p>',
     ),
+    (
+        'do not sync up on stopwords',
+        'at least one foot is touching the ground outside the threshold.',
+        'at least one foot is <strong>touching the ground</strong> outside the threshold.',
+        'at least one foot is <del>touching the ground</del><ins><strong>touching the ground</strong></ins> outside the threshold.',
+    )
 ]
 
 # test cases that should not be run in reverse

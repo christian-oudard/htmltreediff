@@ -80,6 +80,8 @@ def parse_cases(cases):
         if len(args) == 4:
             case.name, case.old_html, case.new_html, case.target_changes = args
             case.edit_script = None
-        else:
+        elif len(args) == 5:
             case.name, case.old_html, case.new_html, case.target_changes, case.edit_script = args
+        else:
+            raise ValueError('Invalid test spec: %r' % (args,))
         yield case

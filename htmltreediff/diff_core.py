@@ -1,6 +1,7 @@
 import difflib
 from xml.dom import Node
 
+from htmltreediff.text import is_text_junk
 from htmltreediff.util import (
     copy_dom,
     HashableTree,
@@ -139,13 +140,6 @@ class Differ():
         for child_index, child in enumerate(node.childNodes):
             self.insert(location + [child_index], child)
 
-def is_junk(hashable_node):
-    # Nodes with no text or just whitespace are junk.
-    for descendant in walk_dom(hashable_node.node):
-        if is_text(descendant) and not descendant.nodeValue.isspace():
-            return False
-    return True
-
 def adjusted_ops(opcodes):
     """
     Iterate through opcodes, turning them into a series of insert and delete
@@ -221,10 +215,18 @@ def get_opcodes(matching_blocks):
     sm.matching_blocks = matching_blocks
     return sm.get_opcodes()
 
+def _is_junk(hashable_node):
+    # Nodes with no text or just whitespace are junk.
+    for descendant in walk_dom(hashable_node.node):
+        if is_text(descendant):
+            if not is_text_junk(descendant.nodeValue):
+                return False
+    return True
+
 def match_blocks(hash_func, old_children, new_children):
     """Use difflib to find matching blocks."""
     sm = difflib.SequenceMatcher(
-        is_junk,
+        _is_junk,
         [hash_func(c) for c in old_children],
         [hash_func(c) for c in new_children],
     )

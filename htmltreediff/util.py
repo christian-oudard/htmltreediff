@@ -42,11 +42,11 @@ def parse_minidom(xml, clean=True, html=True):
         # clean up irrelevant content
         for node in list(walk_dom(dom)):
             if node.nodeType == Node.COMMENT_NODE:
-                remove_node(node)
+                remove_node(node) #TODO: line not covered
             elif node.nodeName == 'style':
                 remove_node(node)
             elif node.nodeName == 'font':
-                unwrap(node)
+                unwrap(node) #TODO: line not covered
             elif node.nodeName == 'span':
                 unwrap(node)
     dom.normalize()
@@ -253,7 +253,7 @@ def get_location(dom, location):
     for i in location:
         node = get_child(node, i)
         if not node:
-            raise ValueError('Node at location %s does not exist.' % location)
+            raise ValueError('Node at location %s does not exist.' % location) #TODO: line not covered
     return node
 
 def ancestors(node):
@@ -268,7 +268,7 @@ def walk_dom(dom, elements_only=False):
         dom = dom.documentElement
     def walk(node):
         if not node:
-            return
+            return #TODO: line not covered
         if elements_only and not is_element(node):
             return
         yield node
@@ -291,14 +291,10 @@ def tree_text(node):
 
 def tree_text_ratio(a_dom, b_dom):
     """Compare two dom trees for text similarity, as a ratio."""
-    matcher = _text_matcher(a_dom, b_dom)
-    return matcher.text_ratio()
-
-def _text_matcher(a_dom, b_dom):
     return WordMatcher(
         a=tree_text(a_dom),
         b=tree_text(b_dom),
-    )
+    ).text_ratio()
 
 # manipulation #
 def copy_dom(dom):

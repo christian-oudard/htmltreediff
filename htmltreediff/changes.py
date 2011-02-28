@@ -93,7 +93,7 @@ def sort_del_before_ins(dom):
     def node_cmp(a, b):
         try:
             if a.tagName == 'del' and b.tagName == 'ins':
-                return -1
+                return -1 #TODO: line not covered
             if a.tagName == 'ins' and b.tagName == 'del':
                 return 1
         except AttributeError:

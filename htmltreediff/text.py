@@ -103,7 +103,7 @@ def split_text(text):
 
 _stopwords = 'a an and as at by for if in it of or so the to'
 _stopwords = set(_stopwords.strip().lower().split())
-def _is_junk(word):
+def is_text_junk(word):
     """Treat whitespace and stopwords as junk for text matching."""
     return word.isspace() or word.lower() in _stopwords
 
@@ -117,7 +117,7 @@ class WordMatcher(SequenceMatcher):
     split into a list of words. This uses a regular expression which groups
     word characters, numbers, punctuation, and html entities.
     """
-    def __init__(self, isjunk=_is_junk, a=None, b=None):
+    def __init__(self, isjunk=is_text_junk, a=None, b=None):
         if a is None:
             a = []
         if b is None:

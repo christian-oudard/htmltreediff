@@ -21,7 +21,7 @@ Text Diff Usage
 ...     'The very quick brown foxes jump over the dog.',
 ...     html=False,
 ... )
-The <ins>very </ins>quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.
+The<ins> very</ins> quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.
 """
 
 from htmltreediff.html import diff

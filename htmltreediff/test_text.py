@@ -35,7 +35,7 @@ def test_text_diff():
             'sub-word changes',
             'The quick brown fox jumps over the lazy dog.',
             'The very quick brown foxes jump over the dog.',
-            'The <ins>very </ins>quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.',
+            'The<ins> very</ins> quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.',
         ),
         (
             'contractions',
