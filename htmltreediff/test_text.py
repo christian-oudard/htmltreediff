@@ -73,6 +73,12 @@ def test_text_diff():
             'first last',
             'first <del><h1>middle</h1> </del>last',
         ),
+        (
+            'do not remove newlines unless necessary',
+            'one two three\nfour six',
+            'one three\nfour five six',
+            'one <del>two </del>three\nfour <ins>five </ins>six',
+        ),
 #        (
 #            'long text diff',
 #            dedent('''
@@ -83,9 +89,9 @@ def test_text_diff():
 #                Site administrators now have access to Bulk Admin Override, which makes performing sweeping changes a painless endeavor.
 #                We optimized the auto-save functionality to allow for better editor performance on long, complicated documents.
 #
-#                 All three of these features were prioritized based on direct customer feedback and I'm excited we were able to make it happen. Once again, I think our customers were right on the money on where we could add some very useful functionality. Thanks for the feedback and as always, if you have any other questions/concerns/comments or if you are just wondering how the weather is in Indianapolis, drop us a line.
-#             '''),
-#             dedent('''
+#                All three of these features were prioritized based on direct customer feedback and I'm excited we were able to make it happen. Once again, I think our customers were right on the money on where we could add some very useful functionality. Thanks for the feedback and as always, if you have any other questions/concerns/comments or if you are just wondering how the weather is in Indianapolis, drop us a line.
+#            '''),
+#            dedent('''
 #                Release Announcement: Protected Policies and Bulk Override
 #                Last night we successfully updated with a shiny new version. Some of the high notes in this release include:
 #
@@ -93,10 +99,18 @@ def test_text_diff():
 #                Site administrators now have access to Bulk Admin Override, which makes performing sweeping changes a painless endeavor.
 #                We optimized the auto-save functionality to eliminate occasional pauses when your changes get saved. These pauses were too long when working on large documents.
 #
-#                 All three of these features were prioritized based on direct customer feedback, and we're excited to be able to make them happen. Once again, I think our customers were right on the money with their suggestions on where things could be improved. Thanks for the feedback as always. If you have any questions/concerns/comments, or if you are just wondering how the weather is in Indianapolis, drop us a line.
+#                All three of these features were prioritized based on direct customer feedback, and we're excited to be able to make them happen. Once again, I think our customers were right on the money with their suggestions on where things could be improved. Thanks for the feedback as always. If you have any questions/concerns/comments, or if you are just wondering how the weather is in Indianapolis, drop us a line.
 #             '''),
-#             '''
-#             ''',
+#             dedent('''
+#                Release Announcement: Protected Policies and Bulk Override
+#                Last night we successfully updated with a shiny new version. Some of the high notes in this release include:
+#
+#                Managers can now restrict the visibility of <del>certain </del>policies <ins>so </ins>that only certain users can view <del>policies</del><ins>them</ins>. I'll be writing <del>up a bit </del>more about this feature a little later, but the gist is that you can now do things like <del>restricting certain </del><ins>restrict </ins>sensitive HR policies from being viewable by general staff members. Another nice usage would be <del>for partitioning </del><ins>to partition </ins>off one segment of policies, say your Lab policies, so that only users from the lab <del>saw them, which can reduce </del><ins>see them. This reduces </ins>search clutter for the <del>majority </del><ins>rest </ins>of your staff <del>that doesn't</del><ins>members, who don't</ins> care about <del>that set of </del><ins>the lab </ins>policies.
+#                Site administrators now have access to Bulk Admin Override, which makes performing sweeping changes a painless endeavor.
+#                We optimized the auto-save functionality to <del>allow for better editor performance on long, complicated </del><ins>eliminate occasional pauses when your changes get saved. These pauses were too long when working on large </ins>documents.
+#
+#                All three of these features were prioritized based on direct customer feedback<ins>, </ins>and <del>I'm</del><ins>we're</ins> excited <del>we were </del><ins>to be </ins>able to make <del>it </del><ins>them </ins>happen. Once again, I think our customers were right on the money <ins>with their suggestions </ins>on where <del>we could add some very useful functionality</del><ins>things could be improved</ins>. Thanks for the feedback <del>and </del>as always<del>, if </del><ins>. If </ins>you have any <del>other </del>questions/concerns/comments<ins>, </ins>or if you are just wondering how the weather is in Indianapolis, drop us a line.
+#             '''),
 #            ),
     ]
     for description, old, new, changes in cases:

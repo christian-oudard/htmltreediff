@@ -28,7 +28,7 @@ def parse_minidom(xml, clean=True, html=True):
     html_parser = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder('dom'))
     # Preprocessing
     xml = remove_comments(xml)
-    if clean:
+    if clean and html:
         xml = remove_newlines(xml)
         xml = normalize_entities(xml)
     xml = xml.strip()
