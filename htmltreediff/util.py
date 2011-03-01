@@ -4,7 +4,7 @@ import html5lib
 from html5lib import treebuilders
 from xml.dom import minidom, Node
 
-from htmltreediff.text import WordMatcher
+from htmltreediff.text import WordMatcher, split_text
 
 ## DOM utilities ##
 # parsing and cleaning #
@@ -170,8 +170,7 @@ class FuzzyHashableTree(object):
             return True
 
         # Check for a fuzzy match.
-        ratio = tree_text_ratio(self.node, other.node)
-        if ratio >= self.cutoff:
+        if check_text_similarity(self.node, other.node, cutoff=self.cutoff):
             return True
 
         return False
@@ -277,24 +276,26 @@ def walk_dom(dom, elements_only=False):
                 yield descendant
     return walk(dom)
 
-def tree_text(node):
-    """Return all the text below the given node as a single string.
+def check_text_similarity(a_dom, b_dom, cutoff):
+    """Check whether two dom trees have similar text or not."""
+    a_words = list(tree_words(a_dom))
+    b_words = list(tree_words(b_dom))
 
-    >>> unicode(tree_text(parse_minidom('<h1>one</h1>two<div>three<em>four</em></div>')))
-    u'one two three four'
+    sm = WordMatcher(a=a_words, b=b_words)
+    if sm.text_ratio() >= cutoff:
+        return True
+    return False
+
+def tree_words(node):
+    """Return all the significant text below the given node as a list of words.
+
+    >>> list(tree_words(parse_minidom('<h1>one</h1>two<div>three<em>four</em></div>')))
+    ['one', 'two', 'three', 'four']
     """
-    text_list = []
     for descendant in walk_dom(node):
         if is_text(descendant):
-            text_list.append(descendant.nodeValue)
-    return ' '.join(text_list)
-
-def tree_text_ratio(a_dom, b_dom):
-    """Compare two dom trees for text similarity, as a ratio."""
-    return WordMatcher(
-        a=tree_text(a_dom),
-        b=tree_text(b_dom),
-    ).text_ratio()
+            for word in split_text(descendant.nodeValue):
+                yield word
 
 # manipulation #
 def copy_dom(dom):

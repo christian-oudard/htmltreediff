@@ -4,7 +4,7 @@ from htmltreediff.util import (
     unwrap,
     wrap_inner,
     remove_node,
-    tree_text_ratio,
+    check_text_similarity,
 )
 from htmltreediff.changes import dom_diff, distribute
 
@@ -19,8 +19,7 @@ def diff(old_html, new_html, cutoff=0.0, html=True, pretty=False):
     new_dom = parse_minidom(new_html, html=html)
 
     # If the two documents are not similar enough, don't show the changes.
-    ratio = tree_text_ratio(old_dom, new_dom)
-    if ratio < cutoff:
+    if not check_text_similarity(old_dom, new_dom, cutoff):
         return '<h2>The differences from the previous version are too large to show concisely.</h2>'
 
     dom = dom_diff(old_dom, new_dom)

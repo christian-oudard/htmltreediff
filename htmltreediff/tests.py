@@ -519,7 +519,13 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
         'at least one foot is touching the ground outside the threshold.',
         'at least one foot is <strong>touching the ground</strong> outside the threshold.',
         'at least one foot is <del>touching the ground</del><ins><strong>touching the ground</strong></ins> outside the threshold.',
-    )
+    ),
+    (
+        'text similarity on long passages',
+        '''<p>A selenium test is a tool with which to test javascript applications.&#160; As long as the tester has access to an xpath, or an id or even a name, it is possible to latch onto a web page (that contains javascript) and 'click' buttons or send keys to text fields or even toggle check boxes.&#160; Without selenium, or a tool similar to selenium, it would be almost impossible to automate the testing of javascript applications.</p>''',
+        '''<p><a href="http://seleniumhq.org/">Selenium</a>&#160;is a tool used to run automated tests using real web browsers. By writing code, a developer is able to ensure that a web application consistently behaves as expected in a real browser environment, with all of the browser-specific quirks.</p><p>A selenium test is a tool with which to test web applications, with an eye towards javascript-intensive applications.&#160; Selenium tests make it possible to latch onto a web page (that contains javascript) and 'click' buttons or send keys to text fields or even toggle check boxes.&#160; Without selenium, or a tool similar to selenium, it would be almost impossible to automate the testing of javascript applications using a real web browser.</p>''',
+        '''<ins><p><a href="http://seleniumhq.org/">Selenium</a> is a tool used to run automated tests using real web browsers. By writing code, a developer is able to ensure that a web application consistently behaves as expected in a real browser environment, with all of the browser-specific quirks.</p></ins><p>A selenium test is a tool with which to test <ins>web applications, with an eye towards </ins>javascript<ins>-intensive</ins> applications. <del>As long as the tester has access to an xpath, or an id or even a name, it is</del><ins>Selenium tests make it</ins> possible to latch onto a web page (that contains javascript) and 'click' buttons or send keys to text fields or even toggle check boxes. Without selenium, or a tool similar to selenium, it would be almost impossible to automate the testing of javascript applications<ins> using a real web browser</ins>.</p>'''
+    ),
 ]
 
 # test cases that should not be run in reverse

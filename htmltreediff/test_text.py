@@ -3,7 +3,7 @@
 from textwrap import dedent
 from nose.tools import assert_equal
 from htmltreediff.html import diff
-from htmltreediff.text import WordMatcher
+from htmltreediff.text import WordMatcher, split_text
 
 def test_text_split():
     cases = [
@@ -26,7 +26,7 @@ def test_text_split():
     ]
     for text, target in cases:
         def test():
-            assert_equal(WordMatcher()._split_text(text), target)
+            assert_equal(split_text(text), target)
         yield test
 
 def test_text_diff():

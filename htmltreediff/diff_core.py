@@ -63,7 +63,7 @@ class Differ():
         # In each gap between exact matches, find fuzzy matches.
         gaps = get_nonmatching_blocks(matching_blocks)
 
-        fuzzy_matching_blocks = []
+        fuzzy_matching_blocks = [(0, 0, 0)]
         for nonmatch in gaps:
             alo, ahi, blo, bhi = nonmatch
             sm_fuzzy = match_blocks(
@@ -77,6 +77,7 @@ class Differ():
                 (alo + a, blo + b, size)
                 for a, b, size in blocks
             ]
+            del fuzzy_matching_blocks[-1] # Remove old sentinel.
             fuzzy_matching_blocks.extend(blocks)
 
         # We will recurse on each tree that was a fuzzy match at this level.

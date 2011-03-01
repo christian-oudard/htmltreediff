@@ -109,13 +109,8 @@ def is_text_junk(word):
 
 class WordMatcher(SequenceMatcher):
     """
-    WordMatcher is a SequenceMatcher that treats a string of text as a sequence
-    of words, and matches accordingly. This produces more intuitive diffs of
-    text, because it won't split a word.
-
-    When the matcher is constructed, or the sequences are set, the string is
-    split into a list of words. This uses a regular expression which groups
-    word characters, numbers, punctuation, and html entities.
+    WordMatcher is a SequenceMatcher that can measure the similarity of
+    sequences of words based on the total length of matching words.
     """
     def __init__(self, isjunk=is_text_junk, a=None, b=None):
         if a is None:
@@ -124,26 +119,12 @@ class WordMatcher(SequenceMatcher):
             b = []
         SequenceMatcher.__init__(self, isjunk, a, b)
 
-    @staticmethod
-    def _split_text(text):
-        return multi_split(text, _word_split_regexes)
-
-    def set_seq1(self, a):
-        if not a:
-            a = ''
-        SequenceMatcher.set_seq1(self, self._split_text(a))
-
-    def set_seq2(self, b):
-        if not b:
-            b = ''
-        SequenceMatcher.set_seq2(self, self._split_text(b))
-
     def text_ratio(self):
         """Return a measure of the sequences' word similarity (float in [0,1]).
 
         Each word has weight equal to its length for this measure
 
-        >>> m = WordMatcher(a='abcdef12', b='abcdef34') # 3/4 of the text is the same
+        >>> m = WordMatcher(a=['abcdef', '12'], b=['abcdef', '34']) # 3/4 of the text is the same
         >>> '%.3f' % m.ratio() # normal ratio fails
         '0.500'
         >>> '%.3f' % m.text_ratio() # text ratio is accurate
@@ -167,6 +148,6 @@ class WordMatcher(SequenceMatcher):
         return sum(self._word_length(word) for word in word_sequence)
 
     def _word_length(self, word):
-        if self.isjunk and self.isjunk(word):
+        if self.isjunk(word):
             return 0
         return len(word)
