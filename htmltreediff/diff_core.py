@@ -15,6 +15,16 @@ from htmltreediff.util import (
     walk_dom,
 )
 
+def match_node_hash(node):
+    if is_text(node):
+        return node.nodeValue
+    return HashableTree(node)
+
+def fuzzy_match_node_hash(node):
+    if is_text(node):
+        return node.nodeValue
+    return FuzzyHashableTree(node)
+
 class Differ():
     def __init__(self, old_dom, new_dom):
         self.edit_script = []
@@ -51,9 +61,34 @@ class Differ():
         # remain are used to output edit script entries.
         old_children = list(get_location(self.old_dom, old_location).childNodes)
         new_children = list(get_location(self.new_dom, new_location).childNodes)
+        if not old_children and not new_children:
+            return
 
+        matching_blocks, recursion_indices = self.match_children(old_children, new_children)
+
+        # Apply changes for this level.
+        for tag, i1, i2, j1, j2 in adjusted_ops(get_opcodes(matching_blocks)):
+            if tag == 'delete':
+                assert j1 == j2
+                # delete range from right to left
+                for index, child in reversed(list(enumerate(old_children[i1:i2]))):
+                    self.delete(old_location + [i1 + index], child)
+                    old_children.pop(i1 + index)
+            elif tag == 'insert':
+                assert i1 == i2
+                # insert range from left to right
+                for index, child in enumerate(new_children[j1:j2]):
+                    self.insert(new_location + [i1 + index], child)
+                    old_children.insert(i1 + index, child)
+            recursion_indices = list(adjust_indices(recursion_indices, i1, i2, j1, j2))
+
+        # Recurse to deeper level.
+        for old_index, new_index in recursion_indices:
+            self.diff_location(old_location + [old_index], new_location + [new_index])
+
+    def match_children(self, old_children, new_children):
         # Find whole-tree matches and fuzzy matches.
-        sm = match_blocks(HashableTree, old_children, new_children)
+        sm = match_blocks(match_node_hash, old_children, new_children)
         # If the match is very poor, pretend there were no exact matching blocks at all.
         if sm.ratio() < 0.3:
             matching_blocks = [(len(old_children), len(new_children), 0)]
@@ -67,7 +102,7 @@ class Differ():
         for nonmatch in gaps:
             alo, ahi, blo, bhi = nonmatch
             sm_fuzzy = match_blocks(
-                FuzzyHashableTree,
+                fuzzy_match_node_hash,
                 old_children[alo:ahi],
                 new_children[blo:bhi],
             )
@@ -90,25 +125,7 @@ class Differ():
         # from this point forward, except for we recurse on fuzzy matches.
         matching_blocks = merge_blocks(matching_blocks, fuzzy_matching_blocks)
 
-        # Apply changes for this level.
-        for tag, i1, i2, j1, j2 in adjusted_ops(get_opcodes(matching_blocks)):
-            if tag == 'delete':
-                assert j1 == j2
-                # delete range from right to left
-                for index, child in reversed(list(enumerate(old_children[i1:i2]))):
-                    self.delete(old_location + [i1 + index], child)
-                    old_children.pop(i1 + index)
-            elif tag == 'insert':
-                assert i1 == i2
-                # insert range from left to right
-                for index, child in enumerate(new_children[j1:j2]):
-                    self.insert(new_location + [i1 + index], child)
-                    old_children.insert(i1 + index, child)
-            recursion_indices = list(adjust_indices(recursion_indices, i1, i2, j1, j2))
-
-        # Recurse to deeper level.
-        for old_index, new_index in recursion_indices:
-            self.diff_location(old_location + [old_index], new_location + [new_index])
+        return matching_blocks, recursion_indices
 
     def delete(self, location, node):
         # delete from the bottom up, children before parent, right to left
@@ -147,7 +164,7 @@ def adjusted_ops(opcodes):
     operations, adjusting indices to account for the size of insertions and
     deletions.
 
-    >>> def sequence_opcodes(old, new): return difflib.SequenceMatcher(None, old, new).get_opcodes()
+    >>> def sequence_opcodes(old, new): return difflib.SequenceMatcher(a=old, b=new).get_opcodes()
     >>> list(adjusted_ops(sequence_opcodes('abc', 'b')))
     [('delete', 0, 1, 0, 0), ('delete', 1, 2, 1, 1)]
     >>> list(adjusted_ops(sequence_opcodes('b', 'abc')))
@@ -212,11 +229,13 @@ def match_indices(match):
 
 def get_opcodes(matching_blocks):
     """Use difflib to get the opcodes for a set of matching blocks."""
-    sm = difflib.SequenceMatcher(None, [], [])
+    sm = difflib.SequenceMatcher(a=[], b=[])
     sm.matching_blocks = matching_blocks
     return sm.get_opcodes()
 
 def _is_junk(hashable_node):
+    if isinstance(hashable_node, basestring):
+        return is_text_junk(hashable_node)
     # Nodes with no text or just whitespace are junk.
     for descendant in walk_dom(hashable_node.node):
         if is_text(descendant):
@@ -228,8 +247,8 @@ def match_blocks(hash_func, old_children, new_children):
     """Use difflib to find matching blocks."""
     sm = difflib.SequenceMatcher(
         _is_junk,
-        [hash_func(c) for c in old_children],
-        [hash_func(c) for c in new_children],
+        a=[hash_func(c) for c in old_children],
+        b=[hash_func(c) for c in new_children],
     )
     return sm
 

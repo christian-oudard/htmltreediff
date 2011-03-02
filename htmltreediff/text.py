@@ -148,6 +148,6 @@ class WordMatcher(SequenceMatcher):
         return sum(self._word_length(word) for word in word_sequence)
 
     def _word_length(self, word):
-        if self.isjunk(word):
+        if self.isjunk and self.isjunk(word):
             return 0
         return len(word)

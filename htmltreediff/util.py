@@ -127,6 +127,9 @@ class HashableNode(object):
         self.node = node
 
     def __eq__(self, other):
+        if not hasattr(other, 'node'):
+            return False
+
         return (self.node.nodeType == other.node.nodeType and
                 self.node.nodeName == other.node.nodeName and
                 self.node.nodeValue == other.node.nodeValue and
@@ -147,6 +150,9 @@ class HashableTree(object):
         self.node = node
 
     def __eq__(self, other):
+        if not hasattr(other, 'node'):
+            return False
+
         return (HashableNode(self.node) == HashableNode(other.node) and
                 [HashableTree(c) for c in self.node.childNodes] ==
                 [HashableTree(c) for c in other.node.childNodes])
@@ -162,6 +168,9 @@ class FuzzyHashableTree(object):
         self.node = node
 
     def __eq__(self, other):
+        if not hasattr(other, 'node'):
+            return False
+
         if HashableNode(self.node) != HashableNode(other.node):
             return False
 
@@ -312,10 +321,7 @@ def remove_node(node):
 
 def insert_or_append(parent, node, next_sibling):
     """
-    Insert the node before next_sibling, at the specified character index. If
-    next_sibling is None, append the node last instead. If the insert split a
-    text node, return the previous and next siblings of the newly inserted
-    node.
+    Insert the node before next_sibling. If next_sibling is None, append the node last instead.
     """
     # simple insert
     if next_sibling:
