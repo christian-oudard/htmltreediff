@@ -15,6 +15,16 @@ def test_text_split():
          ['abcdef', '12']),
         ('entity&quot;s',
          ['entity', '&quot;', 's']),
+        ('stuff&#160;stuff',
+         ['stuff', '&#160;', 'stuff']),
+        (
+            'Stuff with an ampersand A&B stuff. Stuff with a semicolon; more stuff.',
+            [
+                'Stuff', ' ', 'with', ' ', 'an', ' ', 'ampersand', ' ', 'A',
+                '&', 'B', ' ', 'stuff', '.', ' ', 'Stuff', ' ', 'with', ' ',
+                'a', ' ', 'semicolon', ';', ' ', 'more', ' ', 'stuff', '.',
+            ],
+        ),
         ("we're excited",
          ["we're", " ", "excited"]),
         ('dial 1-800-555-1234',

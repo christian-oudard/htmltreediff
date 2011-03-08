@@ -83,7 +83,7 @@ _word_list = [
 
 _word_split_regexes = [
     # HTML Entities
-    re.compile(r'&.*?;', re.IGNORECASE),
+    re.compile(r'&(\w+|#\d+);', re.IGNORECASE),
     # Special cases.
     re.compile('%s' % '|'.join(re.escape(c) for c in _word_list), re.IGNORECASE),
     # Simplified phone number pattern. Any dash-separated list of digits.
