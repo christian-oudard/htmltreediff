@@ -8,8 +8,10 @@ from nose.tools import assert_equal
 from htmltreediff.html import diff
 from htmltreediff.util import (
     parse_minidom,
+    parse_text,
     minidom_tostring,
     html_equal,
+    is_text,
 )
 from htmltreediff.test_util import (
     reverse_edit_script,
@@ -78,6 +80,12 @@ test_cases = [ # test case = (old html, new html, inline changes, edit script)
         [
             ('insert', [0], {'node_type': Node.ELEMENT_NODE, 'node_name': u'div'}),
         ]
+    ),
+    (
+        'text normalization',
+        '<p>first <em>middle</em> last</p>',
+        '<p>first last</p>',
+        '<p>first <del><em>middle</em> </del>last</p>',
     ),
     (
         'space after empty tag',
@@ -746,6 +754,15 @@ def test_parse_comments():
         minidom_tostring(parse_minidom('<p>stuff<!-- \n -->stuff</p>')),
         '<p>stuffstuff</p>',
     )
+
+def test_parse_text():
+    text = 'test one two < & > ;'
+    dom = parse_text(text)
+    root = dom.documentElement
+    assert_equal(len(root.childNodes), 1)
+    child = root.childNodes[0]
+    assert is_text(child)
+    assert child.nodeValue == text
 
 def test_html_equal():
     html_equal_cases = [

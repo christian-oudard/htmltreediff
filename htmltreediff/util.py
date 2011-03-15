@@ -10,11 +10,11 @@ from htmltreediff.text import WordMatcher, split_text
 # parsing and cleaning #
 from xml.dom.pulldom import SAX2DOM
 import lxml.html, lxml.etree, lxml.sax
-def parse_lxml_dom(xml, html=True):
-    if html:
-        parse_func = lxml.html.document_fromstring
-    else:
+def parse_lxml_dom(xml, strict_xml=True):
+    if strict_xml:
         parse_func = lxml.etree.fromstring
+    else:
+        parse_func = lxml.html.document_fromstring
     try:
         tree = parse_func(xml)
     except lxml.etree.XMLSyntaxError:
@@ -24,20 +24,27 @@ def parse_lxml_dom(xml, html=True):
     lxml.sax.saxify(tree, handler)
     return handler.document
 
-def parse_minidom(xml, clean=True, html=True):
+def parse_text(text):
+    dom = parse_lxml_dom('<body/>', strict_xml=True)
+
+    text_node = dom.createTextNode(text)
+    dom.documentElement.appendChild(text_node)
+    return dom
+
+def parse_minidom(xml, clean=True, strict_xml=False):
     html_parser = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder('dom'))
     # Preprocessing
     xml = remove_comments(xml)
-    if clean and html:
+    if clean and not strict_xml:
         xml = remove_newlines(xml)
         xml = normalize_entities(xml)
     xml = xml.strip()
 
     # Parse
-    dom = parse_lxml_dom(xml, html=html)
+    dom = parse_lxml_dom(xml, strict_xml=strict_xml)
 
     if clean:
-        if html:
+        if not strict_xml:
             remove_insignificant_text_nodes(dom)
         # clean up irrelevant content
         for node in list(walk_dom(dom)):
@@ -57,9 +64,9 @@ def parse_minidom(xml, clean=True, html=True):
     for html_element in dom.getElementsByTagName('html'):
         unwrap(html_element)
     if not dom.documentElement:
-        dom = parse_lxml_dom('', html=False)
+        dom = parse_lxml_dom('', strict_xml=True)
 
-    if html:
+    if not strict_xml:
         assert dom.documentElement.tagName == 'body'
 
     return dom

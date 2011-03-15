@@ -1,7 +1,8 @@
 from nose.tools import assert_equal
 
 from htmltreediff.test_util import collapse
-from htmltreediff.html import diff
+from htmltreediff.util import parse_minidom, minidom_tostring
+from htmltreediff.changes import dom_diff
 
 test_cases = [
     (
@@ -103,5 +104,7 @@ test_cases = [
 
 def test_xml_diff():
     for test_name, old_html, new_html, target in test_cases:
-        changes_xml = diff(old_html, new_html, html=False)
+        old_dom = parse_minidom(old_html, strict_xml=True)
+        new_dom = parse_minidom(new_html, strict_xml=True)
+        changes_xml = minidom_tostring(dom_diff(old_dom, new_dom))
         assert_equal(changes_xml, target)

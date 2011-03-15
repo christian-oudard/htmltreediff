@@ -386,7 +386,7 @@ def test_fix_tables():
         changes = collapse(changes)
         fixed_changes = collapse(fixed_changes)
         def test():
-            changes_dom = parse_minidom(changes, html=False)
+            changes_dom = parse_minidom(changes, strict_xml=True)
             fix_tables(changes_dom)
             assert_html_equal(minidom_tostring(changes_dom), fixed_changes)
         test.description = 'test_fix_tables - %s' % test_name

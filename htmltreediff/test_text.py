@@ -48,6 +48,12 @@ def test_text_diff():
             'The<ins> very</ins> quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.',
         ),
         (
+            'special characters',
+            'Assume that A < B, and A & B = {}',
+            'If we assume that A < B, and A & B = {}',
+            '<del>Assume</del><ins>If we assume</ins> that A &lt; B, and A &amp; B = {}',
+        ),
+        (
             'contractions',
             "we were excited",
             "we're excited",
@@ -62,26 +68,20 @@ def test_text_diff():
         (
             'text diff with <',
             'x',
-            '&lt;',
+            '<',
             '<del>x</del><ins>&lt;</ins>',
         ),
         (
             'text diff with >',
             'x',
-            '&gt;',
+            '>',
             '<del>x</del><ins>&gt;</ins>',
         ),
         (
             'text diff with &',
             'x',
-            '&amp;',
+            '&',
             '<del>x</del><ins>&amp;</ins>',
-        ),
-        (
-            'text normalization',
-            'first <h1>middle</h1> last',
-            'first last',
-            'first <del><h1>middle</h1> </del>last',
         ),
         (
             'do not remove newlines unless necessary',
@@ -129,6 +129,6 @@ def test_text_diff():
     ]
     for description, old, new, changes in cases:
         def test():
-            assert_equal(diff(old, new, html=False), changes)
+            assert_equal(diff(old, new, plaintext=True), changes)
         test.description = 'test_text_diff - %s' % description
         yield test

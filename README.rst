@@ -60,7 +60,7 @@ And also for text-only changes::
     >>> print diff(
     ...     'The quick brown fox jumps over the lazy dog.',
     ...     'The very quick brown foxes jump over the dog.',
-    ...     html=False,
+    ...     plaintext=False,
     ... )
     The <ins>very </ins>quick brown <del>fox jumps</del><ins>foxes jump</ins> over the<del> lazy</del> dog.
 

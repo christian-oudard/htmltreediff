@@ -1,5 +1,6 @@
 from htmltreediff.util import (
     parse_minidom,
+    parse_text,
     minidom_tostring,
     unwrap,
     wrap_inner,
@@ -8,15 +9,19 @@ from htmltreediff.util import (
 )
 from htmltreediff.changes import dom_diff, distribute
 
-def diff(old_html, new_html, cutoff=0.0, html=True, pretty=False):
+def diff(old_html, new_html, cutoff=0.0, plaintext=False, pretty=False):
     """Show the differences between the old and new html document, as html.
 
     Return the document html with extra tags added to show changes. Add <ins>
     tags around newly added sections, and <del> tags to show sections that have
     been deleted.
     """
-    old_dom = parse_minidom(old_html, html=html)
-    new_dom = parse_minidom(new_html, html=html)
+    if plaintext:
+        old_dom = parse_text(old_html)
+        new_dom = parse_text(new_html)
+    else:
+        old_dom = parse_minidom(old_html)
+        new_dom = parse_minidom(new_html)
 
     # If the two documents are not similar enough, don't show the changes.
     if not check_text_similarity(old_dom, new_dom, cutoff):
@@ -25,7 +30,7 @@ def diff(old_html, new_html, cutoff=0.0, html=True, pretty=False):
     dom = dom_diff(old_dom, new_dom)
 
     # HTML-specific cleanup.
-    if html:
+    if not plaintext:
         fix_lists(dom)
         fix_tables(dom)
 
