@@ -96,6 +96,8 @@ _word_split_regexes = [
     re.compile(r'[%s]' % re.escape(string.punctuation)),
     # Words
     re.compile(r'\w+', re.UNICODE),
+    # Anything else that isn't whitespace
+    re.compile(r'[^\s]+', re.UNICODE),
 ]
 
 def split_text(text):
